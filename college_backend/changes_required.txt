@@ -1,0 +1,8 @@
+Composite score shouldn't be present in the list displayed when only using closing rank
+
+FIXED - data changes in the excel files aren't being updated on the website 
+
+FIXED - some errors in composite score calculation are still present 
+
+Presently you're required to select a city even if you don't tick mark the 'Distance' option - should only be required to select
+if you choose to select 'distance'

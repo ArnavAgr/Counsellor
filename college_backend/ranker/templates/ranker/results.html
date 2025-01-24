@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Rankings</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #f0f4ff;
+            --text-color: #333;
+            --header-bg: rgba(255, 255, 255, 0.5);
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --table-header-bg: #a3d9f5; /* Light blue for table header */
+            --table-header-text: #333;
+            --row-alt-bg: #f9fbfc; /* Subtle row background for alternation */
+            --row-hover-bg: #c6e2fa; /* Light hover color for light mode */
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1e293b;
+            --text-color: #f8fafc;
+            --header-bg: rgba(51, 65, 85, 0.5);
+            --glass-bg: rgba(51, 65, 85, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --table-header-bg: #2563eb; /* Dark blue for table header */
+            --table-header-text: #ffffff;
+            --row-alt-bg: rgba(255, 255, 255, 0.1);
+            --row-hover-bg: rgba(31, 41, 55, 0.5);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        header {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            width: 50px;
+            height: 25px;
+            background: linear-gradient(135deg, #4caf50, #3b82f6);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle .icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle .toggle-circle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        [data-theme="dark"] .theme-toggle .toggle-circle {
+            transform: translateX(25px);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1260px;
+        }
+
+        table {
+            width: 100%; /* Adjust the table width */
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+        }
+
+        th {
+            padding: 16px;
+            background: var(--table-header-bg);
+            color: var(--table-header-text);
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-color);
+        }
+
+        tr:nth-child(even) {
+            background: var(--row-alt-bg);
+        }
+
+        tr:hover {
+            background: var(--row-hover-bg);
+            color: var(--table-header-text);
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <header>
+        <h1>College Rankings</h1>
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <span class="icon">🌞</span>
+            <span class="toggle-circle"></span>
+            <span class="icon">🌜</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Institute</th>
+                    <th>Branch</th>
+                    <th>Closing Rank</th>
+                    <th>Composite Score</th>
+                    {% if 'Distance' in options %}
+                        <th>Distance (km)</th>
+                    {% endif %}
+                    {% if 'Fees' in options %}
+                        <th>Fees</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                    <tr>
+                        <td>{{ result.institute }}</td>
+                        <td>{{ result.branch }}</td>
+                        <td>{{ result.closing_rank }}</td>
+                        <td>{{ result.composite_score }}</td>
+                        {% if 'Distance' in options %}
+                            <td>{{ result.distance }}</td>
+                        {% endif %}
+                        {% if 'Fees' in options %}
+                            <td>{{ result.fees }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        }
+    </script>
+</body>
+</html>
