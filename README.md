@@ -1,0 +1,29 @@
+You should have python and node.js installed on your system.
+
+Navigate to college_backend and run the following:
+
+pip install djangorestframework
+pip install django
+pip install django-cors-headers
+pip install pandas
+pip install geopy
+pip install openpyxl
+
+Navigate to college_frontend and run the following:
+
+npm install
+
+To run the server:
+
+1) Navigate to college_backend directory and in the terminal, use the command-
+
+  python manage.py runserver
+
+(Backend server should be active and accessible at http://127.0.0.1:8000/)
+
+2) Navigate to college_frontend and use the command-
+
+  npm run dev
+
+Your backend and frontend servers should now be connected and accessible at http://localhost:3000/
+
