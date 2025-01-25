@@ -1,5 +1,7 @@
 You should have python and node.js installed on your system.
 
+Please make sure you're not tracking the college_frontend/node_modules directory through your source control.
+
 Navigate to college_backend and run the following:
 
   pip install pandas </br>
