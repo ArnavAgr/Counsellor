@@ -2,12 +2,12 @@ You should have python and node.js installed on your system.
 
 Navigate to college_backend and run the following:
 
-pip install djangorestframework 
-pip install django 
-pip install django-cors-headers 
-pip install pandas 
-pip install geopy 
-pip install openpyxl 
+pip install djangorestframework </br>
+pip install django </br>
+pip install django-cors-headers </br>
+pip install pandas </br>
+pip install geopy </br>
+pip install openpyxl </br>
 
 Navigate to college_frontend and run the following:
 
