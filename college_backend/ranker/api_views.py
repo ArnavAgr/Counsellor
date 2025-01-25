@@ -5,7 +5,7 @@ from .views import rank_colleges
 
 @api_view(['GET'])
 def get_cities(request):
-    cities = City.objects.all().values('id', 'name')
+    cities = City.objects.all().order_by('name').values('id', 'name')
     return Response(list(cities))
 
 @api_view(['GET'])
