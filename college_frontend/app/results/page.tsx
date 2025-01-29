@@ -1,66 +1,86 @@
-import Header from "../components/Header"
-import Link from "next/link"
-import { Star, MapPin, DollarSign } from "lucide-react"
+"use client";
 
-// Mock data for demonstration purposes
-const mockResults = [
-  { id: 1, name: "IIT Delhi", fees: "High", distance: "15 km", rating: 4.9 },
-  { id: 2, name: "NIT Trichy", fees: "Medium", distance: "30 km", rating: 4.7 },
-  { id: 3, name: "BITS Pilani", fees: "High", distance: "5 km", rating: 4.8 },
-  { id: 4, name: "VIT Vellore", fees: "Medium", distance: "25 km", rating: 4.5 },
-  { id: 5, name: "SRM University", fees: "Low", distance: "10 km", rating: 4.3 },
-]
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { rankColleges } from "../services/api";
 
-export default function ResultsPage({
-  searchParams,
-}: { searchParams: { [key: string]: string | string[] | undefined } }) {
-  const { location, fees, distance } = searchParams
-
-  // In a real application, you would use these parameters to fetch results from an API
-  console.log("Search params:", { location, fees, distance })
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 text-center">Colleges Matching Your Criteria</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockResults.map((college) => (
-            <div key={college.id} className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-2">{college.name}</h2>
-              <div className="flex items-center mb-2">
-                <DollarSign size={16} className="text-gray-600 mr-2" />
-                <span className="text-gray-600">Fees: {college.fees}</span>
-              </div>
-              <div className="flex items-center mb-2">
-                <MapPin size={16} className="text-gray-600 mr-2" />
-                <span className="text-gray-600">Distance: {college.distance}</span>
-              </div>
-              <div className="flex items-center mb-4">
-                <Star size={16} className="text-yellow-400 mr-2" />
-                <span className="text-gray-600">Rating: {college.rating}</span>
-              </div>
-              <Link
-                href="#"
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 inline-block"
-              >
-                Learn More
-              </Link>
-            </div>
-          ))}
-        </div>
-        <div className="mt-8 text-center">
-          <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-300">
-            Load More
-          </button>
-        </div>
-      </main>
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2023 JEE College Finder. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
-  )
+interface Result {
+    institute: string;
+    branch: string;
+    closing_rank: number;
+    composite_score: number;
+    fees?: number;
+    distance?: number;
 }
 
+export default function ResultsPage() {
+    const searchParams = useSearchParams();
+    const [results, setResults] = useState<Result[]>([]);
+    const [filters, setFilters] = useState<any>({});
+    const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchResults = async () => {
+            try {
+                const filtersFromParams = JSON.parse(
+                    decodeURIComponent(searchParams.get("filters") || "{}")
+                );
+                setFilters(filtersFromParams);
+                setSelectedOptions(filtersFromParams.options || []);
+
+                const resultsData = await rankColleges(filtersFromParams);
+                setResults(resultsData.results);
+            } catch (error) {
+                console.error("Error fetching results:", error);
+            }
+        };
+        fetchResults();
+    }, [searchParams]);
+
+    return (
+        <div className="min-h-screen flex flex-col bg-gray-100">
+            <main className="flex-grow container mx-auto px-4 py-8">
+                <h1 className="text-4xl font-bold mb-8 text-center text-blue-700">College Rankings</h1>
+                {results.length > 0 ? (
+                    <div className="overflow-x-auto shadow-lg rounded-lg">
+                        <table className="w-full border-collapse bg-white rounded-lg shadow-md">
+                            <thead className="bg-blue-600 text-white">
+                                <tr>
+                                    <th className="border p-4">Institute</th>
+                                    <th className="border p-4">Branch</th>
+                                    <th className="border p-4">Closing Rank</th>
+                                    {selectedOptions.includes("Distance") && <th className="border p-4">Distance (km)</th>}
+                                    {selectedOptions.includes("Fees") && <th className="border p-4">Fees</th>}
+                                    <th className="border p-4">Composite Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {results.map((result: Result, index) => (
+                                    <tr
+                                        key={`${result.institute}-${result.branch}`}
+                                        className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
+                                    >
+                                        <td className="border p-4 text-gray-900">{result.institute}</td>
+                                        <td className="border p-4 text-gray-900">{result.branch}</td>
+                                        <td className="border p-4 text-gray-900">{result.closing_rank}</td>
+                                        {selectedOptions.includes("Distance") && (
+                                            <td className="border p-4 text-gray-900">{result.distance} km</td>
+                                        )}
+                                        {selectedOptions.includes("Fees") && (
+                                            <td className="border p-4 text-gray-900">₹{result.fees?.toLocaleString()}</td>
+                                        )}
+                                        <td className="border p-4 text-gray-900">{result.composite_score}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <p className="text-center text-gray-700 text-lg font-semibold mt-8">
+                        No results found for the selected filters.
+                    </p>
+                )}
+            </main>
+        </div>
+    );
+}

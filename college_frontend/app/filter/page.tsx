@@ -1,11 +1,10 @@
-"use client";
+"use client"; // Ensures this page is rendered only on the client
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getCities, rankColleges, getBranches } from '../services/api';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getCities, getBranches } from "../services/api";
 import Header from "../components/Header";
 
-// Define types for cities and results
 interface City {
     id: number;
     name: string;
@@ -15,25 +14,21 @@ interface Branch {
     name: string;
 }
 
-interface Result {
-    institute: string;
-    branch: string;
-    closing_rank: number;
-    composite_score: number;
-    fees?: number;
-    distance?: number;
-}
-
 export default function FilterPage() {
     const [cities, setCities] = useState<City[]>([]);
     const [branches, setBranches] = useState<Branch[]>([]);
-    const [results, setResults] = useState<Result[]>([]);
     const [selectedCityId, setSelectedCityId] = useState<number | null>(null);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [maxFees, setMaxFees] = useState<number>(300000);
     const [maxDistance, setMaxDistance] = useState<number>(5000);
-    const [selectedBranchName, setSelectedBranchName] = useState<string>('');
+    const [selectedBranchName, setSelectedBranchName] = useState<string>("");
+    const [isClient, setIsClient] = useState(false);
     const router = useRouter();
+
+    // Ensure this component runs only on the client
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     useEffect(() => {
         async function fetchCities() {
@@ -51,7 +46,7 @@ export default function FilterPage() {
         fetchBranches();
     }, []);
 
-    const handleRankColleges = async (e: React.FormEvent) => {
+    const handleRankColleges = (e: React.FormEvent) => {
         e.preventDefault();
         const data = {
             city: selectedCityId,
@@ -60,15 +55,11 @@ export default function FilterPage() {
             max_distance: maxDistance,
             branch_name: selectedBranchName,
         };
-        console.log("Sending data to backend:", data);
-        try {
-            const resultsData = await rankColleges(data);
-            console.log("Received results from backend:", resultsData);
-            setResults(resultsData.results);
-        } catch (error) {
-            console.error("Error fetching results:", error);
-        }
+
+        router.push(`/results?filters=${encodeURIComponent(JSON.stringify(data))}`);
     };
+
+    if (!isClient) return null; // Prevents hydration issues
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -100,7 +91,7 @@ export default function FilterPage() {
                             onChange={(e) => setMaxFees(Number(e.target.value))}
                             className="w-full"
                         />
-                        <span>₹{maxFees.toLocaleString('en-IN')}</span>
+                        <span>₹{maxFees.toLocaleString("en-IN")}</span>
                     </div>
                     <div className="mb-4">
                         <label htmlFor="maxDistance" className="block mb-2 font-semibold text-gray-700">
@@ -169,41 +160,7 @@ export default function FilterPage() {
                         Rank Colleges
                     </button>
                 </form>
-                <div className="mt-8">
-                    {results.length > 0 && (
-                        <table className="w-full border-collapse">
-                            <thead>
-                                <tr>
-                                    <th className="border p-2">Institute</th>
-                                    <th className="border p-2">Branch</th>
-                                    <th className="border p-2">Closing Rank</th>
-                                    {selectedOptions.includes('Distance') && <th className="border p-2">Distance (km)</th>}
-                                    {selectedOptions.includes('Fees') && <th className="border p-2">Fees</th>}
-                                    <th className="border p-2">Composite Score</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {results.map((result: Result) => (
-                                    <tr key={`${result.institute}-${result.branch}`}>
-                                        <td className="border p-2">{result.institute}</td>
-                                        <td className="border p-2">{result.branch}</td>
-                                        <td className="border p-2">{result.closing_rank}</td>
-                                        {selectedOptions.includes('Distance') && <td className="border p-2">{result.distance}</td>}
-                                        {selectedOptions.includes('Fees') && <td className="border p-2">{result.fees}</td>}
-                                        <td className="border p-2">{result.composite_score}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
             </main>
-            <footer className="bg-gray-800 text-white py-8">
-                <div className="container mx-auto px-4 text-center">
-                    <p>&copy; 2023 JEE College Finder. All rights reserved.</p>
-                </div>
-            </footer>
         </div>
     );
 }
-
