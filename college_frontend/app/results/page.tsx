@@ -77,7 +77,7 @@ export default function ResultsPage() {
                     </div>
                 ) : (
                     <p className="text-center text-gray-700 text-lg font-semibold mt-8">
-                        No results found for the selected filters.
+                        Loading...
                     </p>
                 )}
             </main>
