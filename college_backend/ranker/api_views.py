@@ -1,0 +1,52 @@
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import pandas as pd
+from .models import City, Branch
+from .views import rank_colleges
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .import_data import get_data_files
+
+@csrf_exempt
+def get_cities(request):
+    try:
+        # Read the cities data from the Excel file
+        cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')
+        # Add an index to ensure uniqueness
+        cities = [
+            {
+                "id": str(index),  # Add unique ID
+                "name": str(row["City"]),
+                "latitude": float(row["Latitude"]),
+                "longitude": float(row["Longitude"])
+            }
+            for index, row in cities_df.iterrows()
+        ]
+        return JsonResponse(cities, safe=False)
+    except Exception as e:
+        print(f"Error fetching cities: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+def get_branches(request):
+    try:
+        institution_type = request.query_params.get('institution_type', 'NIT')
+        if institution_type not in ['NIT', 'IIIT', 'IIT']:
+            raise ValueError(f"Invalid institution type: {institution_type}. Must be one of: NIT, IIIT, IIT")
+        
+        files = get_data_files(institution_type)
+        if not files:
+            raise ValueError(f"Could not find data files for institution type: {institution_type}")
+        
+        branches_df = pd.read_excel(files['orcr'])
+        branches = [{'name': str(branch)} for branch in sorted(branches_df['Branch'].unique())]
+        
+        print(f"Found {len(branches)} branches for {institution_type}")
+        return Response(branches)
+    except Exception as e:
+        print(f"Error in get_branches: {str(e)}")
+        return Response({'error': str(e)}, status=500)
+
+@api_view(['POST'])
+def rank_colleges_api(request):
+    return rank_colleges(request)

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Ranker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --accent-color: #3b82f6;
+    --header-bg: #eff6ff;
+    --button-bg: linear-gradient(135deg, #3b82f6, #2563eb);
+    --button-hover-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+[data-theme="dark"] {
+    --bg-color: #1e293b;
+    --text-color: #f1f5f9;
+    --accent-color: #3b82f6;
+    --header-bg: #334155;
+    --button-bg: linear-gradient(135deg, #3b82f6, #2563eb);
+    --button-hover-bg: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    background: var(--header-bg);
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.theme-toggle {
+    width: 50px;
+    height: 25px;
+    background: var(--accent-color);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.theme-toggle .icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle .toggle-circle {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: #1d4ed8;
+}
+
+[data-theme="dark"] .theme-toggle .toggle-circle {
+    transform: translateX(25px);
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(30px);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    margin-top: 100px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 30px; /* Increased space between form groups */
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1rem;
+    font-weight: 300;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #333;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Spacing between checkboxes */
+    justify-content: space-between; /* Aligns checkboxes within the form */
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    accent-color: var(--accent-color);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-wrapper label {
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+}
+
+.slider-container input[type="range"] {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    appearance: none;
+    background: var(--accent-color);
+    height: 6px;
+    border-radius: 10px;
+    outline: none;
+    cursor: pointer;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--text-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.slider-container input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--text-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.slider-value {
+    font-size: 1rem;
+    white-space: nowrap;
+    text-align: right;
+    width: 80px;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--button-bg);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: var(--button-hover-bg);
+}
+
+    </style>
+</head>
+<body data-theme="dark">
+    <header>
+        <h1>College Ranker</h1>
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <span class="icon">🌞</span>
+            <span class="toggle-circle"></span>
+            <span class="icon">🌜</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Calculate Your Rankings</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="city">Select Your City</label>
+                <select name="city" id="city" required>
+                    <option value="">Choose a city</option>
+                    {% for city in cities %}
+                        <option value="{{ city.id }}">{{ city.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fee_range">Fee Range (₹0 - ₹3,00,000)</label>
+                <div class="slider-container">
+                    <input type="range" id="fee_range" name="fee_range" min="0" max="300000" step="1000" value="150000" oninput="updateSliderValue('fee_slider_value', this.value)">
+                    <span class="slider-value" id="fee_slider_value">₹1,50,000</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="distance_range">Distance (0 - 5000 km)</label>
+                <div class="slider-container">
+                    <input type="range" id="distance_range" name="distance_range" min="0" max="5000" step="10" value="1000" oninput="updateSliderValue('distance_slider_value', this.value)">
+                    <span class="slider-value" id="distance_slider_value">1000 km</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="branch_name">Select Branch</label>
+                <select name="branch_name" id="branch_name">
+                    <option value="">All Branches</option>
+                    {% for branch in branches %}
+                        <option value="{{ branch }}">{{ branch }}</option>
+                    {% endfor %}
+                </select>
+            </div>            
+
+            <div class="form-group">
+                <label>Ranking Criteria</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="fees" name="options" value="Fees">
+                        <label for="fees">Fees</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="distance" name="options" value="Distance">
+                        <label for="distance">Distance</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Calculate Rankings</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        }
+
+        function updateSliderValue(id, value) {
+            const formattedValue = id === 'fee_slider_value' ? `₹${parseInt(value).toLocaleString()}` : `${value} km`;
+            document.getElementById(id).textContent = formattedValue;
+        }
+    </script>
+</body>
+</html>
