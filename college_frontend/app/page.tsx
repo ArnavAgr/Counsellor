@@ -39,7 +39,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
-        <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-20">
+        <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-8">
           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -48,11 +48,14 @@ export default function Home() {
               className="md:w-1/2 mb-8 md:mb-0"
             >
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Find Your Perfect College: Simplified Counseling for JEE Aspirants
+                Find Your Perfect College: JoSAA Counselling Simplified for JEE Aspirants
               </h1>
               <p className="text-xl mb-8">
                 Make informed decisions about your future with our personalized college recommendations.
               </p>
+              <a href="filter" className="inline-block bg-white text-blue-600 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300">
+                Find Colleges NOW
+              </a>
             </motion.div>
             <div className="md:w-1/2 flex justify-center items-center">
               {typeof window !== 'undefined' && (  // Add this check
