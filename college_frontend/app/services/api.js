@@ -24,12 +24,13 @@ export const getCities = async () => {
     }
 };
 
-export const getBranches = async (institutionType) => {
+export const getBranches = async (institutionTypes) => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-        const response = await fetch(`http://localhost:8000/api/branches/?institution_type=${institutionType}`, {
+        const queryParams = institutionTypes.map(type => `institution_types=${encodeURIComponent(type)}`).join('&');
+        const response = await fetch(`http://localhost:8000/api/branches/?${queryParams}`, {
             signal: controller.signal
         });
 

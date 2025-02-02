@@ -62,17 +62,18 @@ export default function FilterPage() {
         fetchCities();
     }, []); // Remove selectedInstitutionType dependency since cities are same for both
 
-    useEffect(() => {
-        async function fetchBranches() {
-            try {
-                const branchesData = await getBranches(selectedInstitutionTypes);
-                console.log('Fetched branches:', branchesData); // Debug log
-                setBranches(Array.isArray(branchesData) ? branchesData : []);
-            } catch (error) {
-                console.error("Error fetching branches:", error);
-                setBranches([]);
-            }
+    const fetchBranches = async () => {
+        try {
+            const branchesData = await getBranches(selectedInstitutionTypes);
+            console.log('Fetched branches:', branchesData); // Debug log
+            setBranches(Array.isArray(branchesData) ? branchesData : []);
+        } catch (error) {
+            console.error("Error fetching branches:", error);
+            setBranches([]);
         }
+    };
+
+    useEffect(() => {
         fetchBranches();
     }, [selectedInstitutionTypes]);
 
