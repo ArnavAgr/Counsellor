@@ -1,7 +1,5 @@
 You should have python and node.js installed on your system.
 
-Please make sure you're not tracking the college_frontend/node_modules directory through your source control.
-
 Navigate to college_backend and run the following:
 
   pip install pandas </br>
@@ -29,4 +27,13 @@ To run the server:
   npm run dev
 
 Your backend and frontend servers should now be connected and accessible at http://localhost:3000/
+
+In case you have made changes to the csv/excel files in the backend, follow the below steps before running the servers:
+
+1) Manually delete the file "db.sqlite3" present in the college_backend folder.
+2) In your terminal navigate to college_backend folder and run the following commands:
+
+   Python manage.py makemigrations
+
+   Python manage.py migrate
 
