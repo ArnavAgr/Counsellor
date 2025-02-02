@@ -34,6 +34,7 @@ export default function FilterPage() {
   const [maxFees, setMaxFees] = useState<number>(300000)
   const [maxDistance, setMaxDistance] = useState<number>(5000)
   const [selectedBranchName, setSelectedBranchName] = useState<string>("")
+  const [showDropdown, setShowDropdown] = useState(false);
   const [selectedInstitutionTypes, setSelectedInstitutionTypes] = useState<string[]>(["NIT"]) // Change to array of strings
   const [selectedCategory, setSelectedCategory] = useState<string>("OPEN")
   const [selectedGender, setSelectedGender] = useState<string>("Gender-Neutral")
@@ -72,6 +73,11 @@ export default function FilterPage() {
       setBranches([])
     }
   }
+
+  const handleCitySelect = (cityName: string) => {
+    setSelectedCityName(cityName);
+    setShowDropdown(false); // Hide dropdown after selection
+  };
 
   useEffect(() => {
     fetchBranches()
@@ -150,54 +156,67 @@ export default function FilterPage() {
               ))}
             </div>
           </div>
-          <div className="mb-4">
-            <label htmlFor="city" className="block mb-2 font-semibold text-gray-700">
-              Select City
-            </label>
-            <select
-              onChange={(e) => setSelectedCityName(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-xs"
-              required
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+  {}
+  <div className="relative">
+    <label htmlFor="city" className="block mb-2 font-semibold text-gray-700">
+      Select City
+    </label>
+    <input
+      type="text"
+      value={selectedCityName || ""}
+      onChange={(e) => {
+        setSelectedCityName(e.target.value);
+        setShowDropdown(true); 
+      }}
+      onFocus={() => setShowDropdown(true)}
+      onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+      placeholder="Search city..."
+      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+    {showDropdown && (
+      <ul className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto mt-1">
+        {cities
+          .filter((city) => city.name.toLowerCase().includes(selectedCityName?.toLowerCase() || ""))
+          .map((city) => (
+            <li
+              key={city.id}
+              onMouseDown={() => handleCitySelect(city.name)}
+              className="px-4 py-2 cursor-pointer hover:bg-blue-100"
             >
-              <option value="" key="default-city">
-                Select City
-              </option>
-              {cities && cities.length > 0 ? (
-                cities.map((city: City) => (
-                  <option key={city.id} value={city.name}>
-                    {city.name}
-                  </option>
-                ))
-              ) : (
-                <option value="" key="loading-city">
-                  Loading cities...
-                </option>
-              )}
-            </select>
-          </div>
-          <div className="mb-4">
-            <label htmlFor="category" className="block mb-2 font-semibold text-gray-700">
-              Select Category
-            </label>
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 max-w-xs"
-              required
-            >
-              <option value="OPEN">OPEN</option>
-              <option value="OPEN (PwD)">OPEN (PwD)</option>
-              <option value="EWS">EWS</option>
-              <option value="EWS (PwD)">EWS (PwD)</option>
-              <option value="OBC-NCL">OBC-NCL</option>
-              <option value="OBC-NCL (PwD)">OBC-NCL (PwD)</option>
-              <option value="SC">SC</option>
-              <option value="SC (PwD)">SC (PwD)</option>
-              <option value="ST">ST</option>
-              <option value="ST (PwD)">ST (PwD)</option>
-            </select>
-          </div>
+              {city.name}
+            </li>
+          ))}
+      </ul>
+    )}
+  </div>
+
+  {/* Category Selection */}
+  <div>
+    <label htmlFor="category" className="block mb-2 font-semibold text-gray-700">
+      Select Category
+    </label>
+    <select
+      id="category"
+      value={selectedCategory}
+      onChange={(e) => setSelectedCategory(e.target.value)}
+      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    >
+      <option value="OPEN">OPEN</option>
+      <option value="OPEN (PwD)">OPEN (PwD)</option>
+      <option value="EWS">EWS</option>
+      <option value="EWS (PwD)">EWS (PwD)</option>
+      <option value="OBC-NCL">OBC-NCL</option>
+      <option value="OBC-NCL (PwD)">OBC-NCL (PwD)</option>
+      <option value="SC">SC</option>
+      <option value="SC (PwD)">SC (PwD)</option>
+      <option value="ST">ST</option>
+      <option value="ST (PwD)">ST (PwD)</option>
+    </select>
+  </div>
+</div>
+
           <div className="mb-4">
             <label htmlFor="gender" className="block mb-2 font-semibold text-gray-700">
               Select Gender
@@ -344,4 +363,3 @@ export default function FilterPage() {
     </div>
   )
 }
-
