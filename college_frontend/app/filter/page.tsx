@@ -90,8 +90,8 @@ export default function FilterPage() {
 
   const handleRankColleges = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (selectedCityName === null) {
-      setError("City not selected")
+    if (selectedOptions.includes("Distance") && selectedCityName === null) {
+      setError("City must be selected if Distance is chosen")
       return
     }
 

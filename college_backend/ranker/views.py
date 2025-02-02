@@ -161,8 +161,12 @@ def rank_colleges(request):
                     logger.error(f"Merge failed with error: {str(e)}")
                     raise
 
-                # Get selected city data
-                selected_city_data = cities_df[cities_df['City'] == data['city']].iloc[0]
+                # Get selected city data if Distance option is selected
+                if 'Distance' in data.get('options', []):
+                    selected_city_data = cities_df[cities_df['City'] == data['city']]
+                    if selected_city_data.empty:
+                        raise ValueError("Selected city not found in the dataset")
+                    selected_city_data = selected_city_data.iloc[0]
 
                 # Filter by fees if option is selected
                 if 'Fees' in data.get('options', []):
