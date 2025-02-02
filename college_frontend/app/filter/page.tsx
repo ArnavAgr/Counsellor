@@ -78,11 +78,7 @@ export default function FilterPage() {
 
     const handleInstitutionTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setSelectedInstitutionTypes((prev) =>
-            prev.includes(value)
-                ? prev.filter((type) => type !== value)
-                : [...prev, value]
-        );
+        setSelectedInstitutionTypes([value]); // Only allow one selection
     };
 
     const handleRankColleges = async (e: React.FormEvent) => {
