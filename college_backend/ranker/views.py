@@ -75,14 +75,25 @@ def rank_colleges(request):
             data = json.loads(request.body)
             logger.info(f"Request data: {data}")
             
-            institution_type = data.get('institution_type', 'NIT')
-            files = get_data_files(institution_type)
+            institution_types = data.get('institution_types', ['NIT'])
+            if 'NIT+IIIT' in institution_types:
+                institution_types.remove('NIT+IIIT')
+                institution_types.extend(['NIT', 'IIIT'])
             
             try:
                 # Load DataFrames
-                orcr_df = pd.read_excel(files['orcr'])
-                fee_df = pd.read_excel(files['fee'])
-                geodata_df = pd.read_excel(files['geodata'])
+                orcr_dfs = []
+                fee_dfs = []
+                geodata_dfs = []
+                for institution_type in institution_types:
+                    files = get_data_files(institution_type)
+                    orcr_dfs.append(pd.read_excel(files['orcr']))
+                    fee_dfs.append(pd.read_excel(files['fee']))
+                    geodata_dfs.append(pd.read_excel(files['geodata']))
+                
+                orcr_df = pd.concat(orcr_dfs, ignore_index=True)
+                fee_df = pd.concat(fee_dfs, ignore_index=True)
+                geodata_df = pd.concat(geodata_dfs, ignore_index=True)
                 cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')
 
                 # Clean column names

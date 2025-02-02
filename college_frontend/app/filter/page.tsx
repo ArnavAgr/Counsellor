@@ -34,7 +34,7 @@ export default function FilterPage() {
     const [maxFees, setMaxFees] = useState<number>(300000);
     const [maxDistance, setMaxDistance] = useState<number>(5000);
     const [selectedBranchName, setSelectedBranchName] = useState<string>('');
-    const [selectedInstitutionType, setSelectedInstitutionType] = useState<string>('NIT'); // Change default value from 'NIT/IIIT' to 'NIT'
+    const [selectedInstitutionTypes, setSelectedInstitutionTypes] = useState<string[]>(['NIT']); // Change to array of strings
     const [selectedCategory, setSelectedCategory] = useState<string>('OPEN');
     const [selectedGender, setSelectedGender] = useState<string>('Gender-Neutral');
     const [isClient, setIsClient] = useState(false);
@@ -65,7 +65,7 @@ export default function FilterPage() {
     useEffect(() => {
         async function fetchBranches() {
             try {
-                const branchesData = await getBranches(selectedInstitutionType);
+                const branchesData = await getBranches(selectedInstitutionTypes);
                 console.log('Fetched branches:', branchesData); // Debug log
                 setBranches(Array.isArray(branchesData) ? branchesData : []);
             } catch (error) {
@@ -74,7 +74,16 @@ export default function FilterPage() {
             }
         }
         fetchBranches();
-    }, [selectedInstitutionType]);
+    }, [selectedInstitutionTypes]);
+
+    const handleInstitutionTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSelectedInstitutionTypes((prev) =>
+            prev.includes(value)
+                ? prev.filter((type) => type !== value)
+                : [...prev, value]
+        );
+    };
 
     const handleRankColleges = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -87,7 +96,7 @@ export default function FilterPage() {
         setError(null);
         
         const data = {
-            institution_type: selectedInstitutionType,
+            institution_types: selectedInstitutionTypes, // Change to array
             city: selectedCityName,
             options: selectedOptions,
             max_fees: maxFees,
@@ -125,23 +134,23 @@ export default function FilterPage() {
                 <h1 className="text-3xl font-bold mb-8 text-center">Find Your Ideal College</h1>
                 <form onSubmit={handleRankColleges} className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
                     <div className="mb-4">
-                        <label htmlFor="institutionType" className="block mb-2 font-semibold text-gray-700">
+                        <label className="block mb-2 font-semibold text-gray-700">
                             Select Institution Type
                         </label>
-                        <select 
-                            id="institutionType"
-                            value={selectedInstitutionType}
-                            onChange={(e) => {
-                                setSelectedInstitutionType(e.target.value);
-                                setSelectedBranchName(''); // Reset branch selection when institution type changes
-                            }} 
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                            required
-                        >
-                            <option value="NIT">NIT</option>
-                            <option value="IIIT">IIIT</option>
-                            <option value="IIT">IIT</option>
-                        </select>
+                        <div className="flex flex-col space-y-2">
+                            {['IIT', 'NIT', 'IIIT', 'NIT+IIIT'].map((type) => (
+                                <label key={type} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={type}
+                                        checked={selectedInstitutionTypes.includes(type)}
+                                        onChange={handleInstitutionTypeChange}
+                                        className="mr-2"
+                                    />
+                                    {type}
+                                </label>
+                            ))}
+                        </div>
                     </div>
                     <div className="mb-4">
                         <label htmlFor="city" className="block mb-2 font-semibold text-gray-700">
