@@ -209,14 +209,17 @@ def rank_colleges(request):
 
                 # Calculate composite scores
                 if results:
-                    min_score = min(result['closing_rank'] for result in results)
-                    max_score = max(result['closing_rank'] for result in results)
-                    
-                    for result in results:
-                        normalized_score = (result['closing_rank'] - min_score) / (max_score - min_score)
-                        result['composite_score'] = round(10 * (1 - normalized_score), 2)
+                    if len(results) == 1:
+                        results[0]['composite_score'] = 10
+                    else:
+                        min_score = min(result['closing_rank'] for result in results)
+                        max_score = max(result['closing_rank'] for result in results)
+                        
+                        for result in results:
+                            normalized_score = (result['closing_rank'] - min_score) / (max_score - min_score)
+                            result['composite_score'] = round(10 * (1 - normalized_score), 2)
 
-                    results.sort(key=lambda x: x['composite_score'], reverse=True)
+                        results.sort(key=lambda x: x['composite_score'], reverse=True)
 
                 return JsonResponse({'results': results, 'options': data.get('options', [])})
 
