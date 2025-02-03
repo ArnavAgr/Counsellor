@@ -15,6 +15,8 @@ export default function Home() {
   const controls = useAnimation()
   const [ref, inView] = useInView()
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [typedText, setTypedText] = useState("")
+  const fullText = "Make informed decisions about your future with our personalized college recommendations."
 
   useEffect(() => {
     if (inView) {
@@ -30,6 +32,20 @@ export default function Home() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    let currentIndex = 0
+    const typingInterval = setInterval(() => {
+      if (currentIndex < fullText.length) {
+        setTypedText(fullText.slice(0, currentIndex + 1))
+        currentIndex++
+      } else {
+        clearInterval(typingInterval)
+      }
+    }, 50) // Adjust the typing speed here (milliseconds per character)
+
+    return () => clearInterval(typingInterval)
+  }, [fullText])
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -51,7 +67,7 @@ export default function Home() {
                 Find Your Perfect College: JoSAA Counselling Simplified for JEE Aspirants
               </h1>
               <p className="text-xl mb-8">
-                Make informed decisions about your future with our personalized college recommendations.
+                {typedText}
               </p>
               <a href="filter" className="inline-block bg-white text-blue-600 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300">
                 Find Colleges NOW
@@ -63,7 +79,7 @@ export default function Home() {
                   animationData={teachingAnimation}
                   play
                   loop
-                  className="w-65 h-65"
+                  className="w-70 h-50"
                 />
               )}
             </div>
