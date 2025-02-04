@@ -142,7 +142,16 @@ def rank_colleges(request):
                     filtered_df = filtered_df[filtered_df['Branch'] == data.get('branch_name')].copy()
                     logger.info(f"Rows after branch filter: {len(filtered_df)}")
 
-                # Get selected city data if Distance option is selected
+                # Apply filters before calculating scores
+                # Filter by fees if option is selected
+                if 'Fees' in data.get('options', []):
+                    max_fees = float(data.get('max_fees', float('inf')))
+                    logger.info(f"Filtering by max fees: {max_fees}")
+                    before_fees = len(filtered_df)
+                    filtered_df = filtered_df[filtered_df['Fees'] <= max_fees]
+                    logger.info(f"Removed {before_fees - len(filtered_df)} colleges due to fees filter")
+
+                # Calculate and filter by distance if option is selected
                 if 'Distance' in data.get('options', []):
                     selected_city_data = cities_df[cities_df['City'] == data['city']]
                     if selected_city_data.empty:
@@ -158,10 +167,18 @@ def rank_colleges(request):
                         axis=1
                     )
                     
-                    # Calculate distance scores (higher score for shorter distance)
-                    distances = filtered_df['Distance'].tolist()
-                    distance_scores = calculate_distance_scores(distances)
-                    filtered_df['Distance_Score'] = distance_scores
+                    # Apply distance filter
+                    max_distance = float(data.get('max_distance', float('inf')))
+                    logger.info(f"Filtering by max distance: {max_distance}")
+                    before_distance = len(filtered_df)
+                    filtered_df = filtered_df[filtered_df['Distance'] <= max_distance]
+                    logger.info(f"Removed {before_distance - len(filtered_df)} colleges due to distance filter")
+                    
+                    # Calculate distance scores for remaining colleges
+                    if len(filtered_df) > 0:
+                        distances = filtered_df['Distance'].tolist()
+                        distance_scores = calculate_distance_scores(distances)
+                        filtered_df['Distance_Score'] = distance_scores
 
                 # Process results
                 results = []

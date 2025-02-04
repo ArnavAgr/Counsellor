@@ -103,26 +103,9 @@ export default function FilterPage() {
       return
     }
 
-    // Validate weights if using custom weights
-    if (useCustomWeights) {
-      const relevantWeights = {
-        rank: weights.rank,
-        ...(selectedOptions.includes('Fees') ? { fees: weights.fees } : {}),
-        ...(selectedOptions.includes('Distance') ? { distance: weights.distance } : {}),
-        ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {})
-      }
-      
-      const totalWeight = Object.values(relevantWeights).reduce((sum, weight) => sum + weight, 0)
-      if (Math.abs(totalWeight - 1) > 0.01) { // Using 0.01 to account for floating point precision
-        setError("The sum of all weights must equal 1")
-        return
-      }
-    }
-
     setIsLoading(true)
     setError(null)
 
-    // Filter weights to only include selected options plus rank
     const relevantWeights = {
       rank: weights.rank,
       ...(selectedOptions.includes('Fees') ? { fees: weights.fees } : {}),
@@ -138,7 +121,10 @@ export default function FilterPage() {
       category: selectedCategory,
       gender: selectedGender,
       useCustomWeights,
-      weights: useCustomWeights ? relevantWeights : undefined
+      weights: useCustomWeights ? relevantWeights : undefined,
+      // Always include max values when corresponding options are selected
+      ...(selectedOptions.includes('Fees') && { max_fees: maxFees }),
+      ...(selectedOptions.includes('Distance') && { max_distance: maxDistance })
     }
 
     try {
