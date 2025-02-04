@@ -42,6 +42,13 @@ export default function FilterPage() {
   const [isClient, setIsClient] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [useCustomWeights, setUseCustomWeights] = useState<boolean>(false)
+  const [weights, setWeights] = useState({
+    rank: 0.7,
+    fees: 0.3,
+    distance: 0.2,
+    nirf: 0.4
+  })
   const router = useRouter()
 
   // Ensure this component runs only on the client
@@ -96,18 +103,42 @@ export default function FilterPage() {
       return
     }
 
+    // Validate weights if using custom weights
+    if (useCustomWeights) {
+      const relevantWeights = {
+        rank: weights.rank,
+        ...(selectedOptions.includes('Fees') ? { fees: weights.fees } : {}),
+        ...(selectedOptions.includes('Distance') ? { distance: weights.distance } : {}),
+        ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {})
+      }
+      
+      const totalWeight = Object.values(relevantWeights).reduce((sum, weight) => sum + weight, 0)
+      if (Math.abs(totalWeight - 1) > 0.01) { // Using 0.01 to account for floating point precision
+        setError("The sum of all weights must equal 1")
+        return
+      }
+    }
+
     setIsLoading(true)
     setError(null)
 
+    // Filter weights to only include selected options plus rank
+    const relevantWeights = {
+      rank: weights.rank,
+      ...(selectedOptions.includes('Fees') ? { fees: weights.fees } : {}),
+      ...(selectedOptions.includes('Distance') ? { distance: weights.distance } : {}),
+      ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {})
+    }
+
     const data = {
-      institution_types: selectedInstitutionTypes, // Change to array
+      institution_types: selectedInstitutionTypes,
       city: selectedCityName,
       options: selectedOptions,
-      max_fees: maxFees,
-      max_distance: maxDistance,
       branch_name: selectedBranchName,
       category: selectedCategory,
       gender: selectedGender,
+      useCustomWeights,
+      weights: useCustomWeights ? relevantWeights : undefined
     }
 
     try {
@@ -130,6 +161,16 @@ export default function FilterPage() {
   }
 
   if (!isClient) return null // Prevents hydration issues
+
+  // Add a helper function at the component level
+  const handleWeightChange = (field: keyof typeof weights, value: string) => {
+    const numValue = parseFloat(value)
+    // Only update if it's a valid number, otherwise set to 0
+    setWeights(prev => ({
+      ...prev,
+      [field]: isNaN(numValue) ? 0 : numValue
+    }))
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -331,6 +372,106 @@ export default function FilterPage() {
               </label>
             </div>
           </div>
+          <div className="mb-4">
+  <label className="block mb-2 font-semibold text-gray-700">Weightage Options</label>
+  <div className="space-y-4">
+    <div className="flex items-center">
+      <input
+        type="radio"
+        id="predefinedWeights"
+        name="weightOption"
+        checked={!useCustomWeights}
+        onChange={() => setUseCustomWeights(false)}
+        className="mr-2"
+      />
+      <label htmlFor="predefinedWeights">Use Predefined Weights</label>
+    </div>
+    <div className="flex items-center">
+      <input
+        type="radio"
+        id="customWeights"
+        name="weightOption"
+        checked={useCustomWeights}
+        onChange={() => setUseCustomWeights(true)}
+        className="mr-2"
+      />
+      <label htmlFor="customWeights">Use Custom Weights</label>
+    </div>
+    {useCustomWeights && (
+      <div className="space-y-2">
+        <p className="text-sm text-gray-600 mb-4">
+          Note: The sum of all weights must equal 1.<br></br>
+          Current sum: {
+            (weights.rank +
+             (selectedOptions.includes('Fees') ? weights.fees : 0) +
+             (selectedOptions.includes('Distance') ? weights.distance : 0) +
+             (selectedOptions.includes('NIRF') ? weights.nirf : 0)
+            ).toFixed(2)
+          }
+        </p>
+        <div>
+          <label htmlFor="rankWeight" className="block mb-1">Rank Weight (Required)</label>
+          <input
+            type="number"
+            id="rankWeight"
+            value={weights.rank.toString()}
+            onChange={(e) => handleWeightChange('rank', e.target.value)}
+            className="w-full px-3 py-2 border rounded-md"
+            step="0.1"
+            min="0"
+            max="1"
+            required
+          />
+        </div>
+        {selectedOptions.includes('Fees') && (
+          <div>
+            <label htmlFor="feesWeight" className="block mb-1">Fees Weight</label>
+            <input
+              type="number"
+              id="feesWeight"
+              value={weights.fees.toString()}
+              onChange={(e) => handleWeightChange('fees', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
+        {selectedOptions.includes('Distance') && (
+          <div>
+            <label htmlFor="distanceWeight" className="block mb-1">Distance Weight</label>
+            <input
+              type="number"
+              id="distanceWeight"
+              value={weights.distance.toString()}
+              onChange={(e) => handleWeightChange('distance', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
+        {selectedOptions.includes('NIRF') && (
+          <div>
+            <label htmlFor="nirfWeight" className="block mb-1">NIRF Weight</label>
+            <input
+              type="number"
+              id="nirfWeight"
+              value={weights.nirf.toString()}
+              onChange={(e) => handleWeightChange('nirf', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+</div>
           <button
             type="submit"
             className="col-span-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-gray-400"

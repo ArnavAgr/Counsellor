@@ -19,7 +19,16 @@ weight6 = 0.1
 
 min_closing_rank, max_closing_rank, min_fee, max_fee = calculate_min_max_values()
 
-def calculate_composite_score(branch, options):
+def calculate_composite_score(branch, options, use_custom_weights=False, custom_weights=None):
+    # Default weights if not using custom weights
+    weights = {
+        'rank': 0.7,
+        'fees': 0.3,
+        'distance': 0.2,
+        'nirf': 0.4
+    } if not use_custom_weights else custom_weights
+
+    # Calculate individual scores (all normalized to 0-10 range)
     rank_score = 10 * (1 - ((branch['Closing_Rank'] - min_closing_rank) / (max_closing_rank - min_closing_rank)))
     fee_score = 0
     distance_score = 0
@@ -28,47 +37,46 @@ def calculate_composite_score(branch, options):
     if 'Fees' in options:
         fee_score = 10 * (1 - ((branch['Fees'] - min_fee) / (max_fee - min_fee)))
     if 'Distance' in options:
-        distance_score = branch['Distance_Score']
+        distance_score = branch['Distance_Score']  # Already normalized to 0-10
     if 'NIRF' in options:
-        nirf_score = branch['Nirf_Weightage']
+        nirf_score = branch['Nirf_Weightage']  # Already normalized to 0-10
 
-    if len(options) == 0:
-        return rank_score
-    elif len(options) == 1:
-        if 'Fees' in options:
-            return (weigth1 * rank_score) + (weight2 * fee_score)
-        elif 'Distance' in options:
-            return (weigth1 * rank_score) + (weight2 * distance_score)
-        elif 'NIRF' in options:
-            return (weigth1 * rank_score) + (weight2 * nirf_score)
-    elif len(options) == 2:
-        if 'Fees' in options and 'Distance' in options:
-            return (weight4 * rank_score) + (weight2 * fee_score) + (weight3 * distance_score)
-        elif 'Fees' in options and 'NIRF' in options:
-            return (weight4 * rank_score) + (weight2 * fee_score) + (weight3 * nirf_score)
-        elif 'Distance' in options and 'NIRF' in options:
-            return (weight4 * rank_score) + (weight2 * distance_score) + (weight3 * nirf_score)
-    else:
-        return (weigth1 * rank_score) + (weight6 * fee_score) + (weight6 * distance_score) + (weight6 * nirf_score)
+    # Calculate weighted sum
+    total_score = weights['rank'] * rank_score
+    total_weight = weights['rank']
 
-def calculate_distance_scores(user_city, institute_data):
-    distances = []
-    for _, row in institute_data.iterrows():
-        distance = geodesic(
-            (user_city.latitude, user_city.longitude),
-            (row['Latitude'], row['Longitude'])
-        ).km
-        distances.append(distance)
+    if 'Fees' in options:
+        total_score += weights['fees'] * fee_score
+        total_weight += weights['fees']
+    if 'Distance' in options:
+        total_score += weights['distance'] * distance_score
+        total_weight += weights['distance']
+    if 'NIRF' in options:
+        total_score += weights['nirf'] * nirf_score
+        total_weight += weights['nirf']
 
-    max_distance = max(distances)
-    min_distance = min(distances)
-    scores = [
-        10 * (1 - ((distance - min_distance) / (max_distance - min_distance)))
-        for distance in distances
-    ]
+    # Normalize final score to ensure it's in 1-10 range
+    normalized_score = (total_score / total_weight) if total_weight > 0 else rank_score
+    
+    # Ensure score is between 1 and 10
+    normalized_score = max(1, min(10, normalized_score))
+    
+    return round(normalized_score, 2)
 
-    institute_data['Distance_Score'] = scores
-    return institute_data
+def calculate_distance_scores(distances):
+    """Convert raw distances to scores where shorter distances get higher scores"""
+    if not distances:
+        return []
+        
+    max_dist = max(distances)
+    min_dist = min(distances)
+    
+    # If all distances are the same, return maximum score for all
+    if max_dist == min_dist:
+        return [10] * len(distances)
+    
+    # Invert the normalization so shorter distances get higher scores
+    return [10 * (1 - (distance - min_dist) / (max_dist - min_dist)) for distance in distances]
 
 def get_cities(request):
     cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')
@@ -91,6 +99,15 @@ def rank_colleges(request):
         try:
             data = json.loads(request.body)
             logger.info(f"Request data: {data}")
+            
+            # Validate weights if using custom weights
+            if data.get('useCustomWeights'):
+                weights = data.get('weights', {})
+                total_weight = sum(weights.values())
+                if abs(total_weight - 1) > 0.01:  # Using 0.01 to account for floating point precision
+                    return JsonResponse({
+                        'error': f'The sum of weights must equal 1. Current sum: {total_weight:.2f}'
+                    }, status=400)
             
             institution_types = data.get('institution_types', ['NIT'])
             if 'NIT+IIIT' in institution_types:
@@ -131,14 +148,20 @@ def rank_colleges(request):
                     if selected_city_data.empty:
                         raise ValueError("Selected city not found in the dataset")
                     selected_city_data = selected_city_data.iloc[0]
-                    # Calculate distances
-                    filtered_df['Distance_Score'] = filtered_df.apply(
+                    
+                    # Calculate raw distances first
+                    filtered_df['Distance'] = filtered_df.apply(
                         lambda row: round(geodesic(
                             (selected_city_data['Latitude'], selected_city_data['Longitude']),
                             (row['Latitude'], row['Longitude'])
                         ).km, 0),
                         axis=1
                     )
+                    
+                    # Calculate distance scores (higher score for shorter distance)
+                    distances = filtered_df['Distance'].tolist()
+                    distance_scores = calculate_distance_scores(distances)
+                    filtered_df['Distance_Score'] = distance_scores
 
                 # Process results
                 results = []
@@ -155,31 +178,47 @@ def rank_colleges(request):
                             result['fees'] = int(row['Fees']) if pd.notna(row['Fees']) else 0
                         
                         if 'Distance' in data.get('options', []):
-                            result['distance'] = int(row['Distance_Score']) if pd.notna(row['Distance_Score']) else 0
+                            # Show actual distance in kilometers
+                            result['distance'] = int(row['Distance']) if pd.notna(row['Distance']) else 0
                         
                         if 'NIRF' in data.get('options', []):
-                            result['nirf_ranking'] = str(row['Nirf_Ranking']) if pd.notna(row['Nirf_Ranking']) else 0
+                            result['nirf_ranking'] = str(row['Nirf_Ranking']) if pd.notna(row['Nirf_Ranking']) else "Unranked"
                         
-                        result['composite_score'] = calculate_composite_score(row, data.get('options', []))
+                        # Calculate raw composite score
+                        result['composite_score'] = calculate_composite_score(
+                            row, 
+                            data.get('options', []),
+                            data.get('useCustomWeights', False),
+                            data.get('weights')
+                        )
                         results.append(result)
                     except Exception as e:
                         logger.error(f"Error processing row: {e}")
                         logger.error(f"Row data: {row}")
                         continue
 
-                # Calculate composite scores
+                # Normalize all composite scores to 0-10 range
                 if results:
-                    if len(results) == 1:
-                        results[0]['composite_score'] = 10
-                    else:
-                        min_score = min(result['closing_rank'] for result in results)
-                        max_score = max(result['closing_rank'] for result in results)
-                        
+                    # Get min and max scores
+                    min_score = min(result['composite_score'] for result in results)
+                    max_score = max(result['composite_score'] for result in results)
+                    
+                    # Normalize scores only if there's more than one result
+                    if len(results) > 1:
                         for result in results:
-                            normalized_score = (result['closing_rank'] - min_score) / (max_score - min_score)
-                            result['composite_score'] = round(10 * (1 - normalized_score), 2)
+                            # Apply min-max normalization to scale between 0 and 10
+                            result['composite_score'] = round(
+                                10 * (result['composite_score'] - min_score) / (max_score - min_score)
+                                if max_score != min_score
+                                else 10,  # If all scores are the same, assign 10
+                                2
+                            )
+                    else:
+                        # If there's only one result, give it a score of 10
+                        results[0]['composite_score'] = 10
 
-                        results.sort(key=lambda x: x['composite_score'], reverse=True)
+                    # Sort results by normalized composite score
+                    results.sort(key=lambda x: x['composite_score'], reverse=True)
 
                 return JsonResponse({'results': results, 'options': data.get('options', [])})
 
