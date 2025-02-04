@@ -13,26 +13,43 @@ weigth1 = 0.7
 weight2 = 0.3
 weight3 = 0.2
 weight4 = 0.5
+weight5 = 0.4
+weight6 = 0.1
+
 
 min_closing_rank, max_closing_rank, min_fee, max_fee = calculate_min_max_values()
 
-def calculate_composite_score(branch, user_city, options):
-    rank_score = 10 * (1 - ((branch.closing_rank - min_closing_rank) / (max_closing_rank - min_closing_rank)))
+def calculate_composite_score(branch, options):
+    rank_score = 10 * (1 - ((branch['Closing_Rank'] - min_closing_rank) / (max_closing_rank - min_closing_rank)))
+    fee_score = 0
+    distance_score = 0
+    nirf_score = 0
 
-    if not options:
+    if 'Fees' in options:
+        fee_score = 10 * (1 - ((branch['Fees'] - min_fee) / (max_fee - min_fee)))
+    if 'Distance' in options:
+        distance_score = branch['Distance_Score']
+    if 'NIRF' in options:
+        nirf_score = branch['Nirf_Weightage']
+
+    if len(options) == 0:
         return rank_score
-
-    if len(options) == 1:
+    elif len(options) == 1:
         if 'Fees' in options:
-            fee_score = 10 * (1 - ((branch.fees - min_fee) / (max_fee - min_fee)))
-            return ((weigth1 * rank_score) + (weight2 * fee_score))
+            return (weigth1 * rank_score) + (weight2 * fee_score)
         elif 'Distance' in options:
-            distance_score = branch.distance_score
-            return ((weigth1 * rank_score) + (weight2 * distance_score))
-
-    fee_score = 10 * (1 - ((branch.fees - min_fee) / (max_fee - min_fee)))
-    distance_score = branch.distance_score
-    return ((weight4 * rank_score) + (weight2 * fee_score) + (weight3 * distance_score))
+            return (weigth1 * rank_score) + (weight2 * distance_score)
+        elif 'NIRF' in options:
+            return (weigth1 * rank_score) + (weight2 * nirf_score)
+    elif len(options) == 2:
+        if 'Fees' in options and 'Distance' in options:
+            return (weight4 * rank_score) + (weight2 * fee_score) + (weight3 * distance_score)
+        elif 'Fees' in options and 'NIRF' in options:
+            return (weight4 * rank_score) + (weight2 * fee_score) + (weight3 * nirf_score)
+        elif 'Distance' in options and 'NIRF' in options:
+            return (weight4 * rank_score) + (weight2 * distance_score) + (weight3 * nirf_score)
+    else:
+        return (weigth1 * rank_score) + (weight6 * fee_score) + (weight6 * distance_score) + (weight6 * nirf_score)
 
 def calculate_distance_scores(user_city, institute_data):
     distances = []
@@ -115,7 +132,7 @@ def rank_colleges(request):
                         raise ValueError("Selected city not found in the dataset")
                     selected_city_data = selected_city_data.iloc[0]
                     # Calculate distances
-                    filtered_df['Distance'] = filtered_df.apply(
+                    filtered_df['Distance_Score'] = filtered_df.apply(
                         lambda row: round(geodesic(
                             (selected_city_data['Latitude'], selected_city_data['Longitude']),
                             (row['Latitude'], row['Longitude'])
@@ -138,8 +155,12 @@ def rank_colleges(request):
                             result['fees'] = int(row['Fees']) if pd.notna(row['Fees']) else 0
                         
                         if 'Distance' in data.get('options', []):
-                            result['distance'] = int(row['Distance']) if pd.notna(row['Distance']) else 0
+                            result['distance'] = int(row['Distance_Score']) if pd.notna(row['Distance_Score']) else 0
                         
+                        if 'NIRF' in data.get('options', []):
+                            result['nirf_ranking'] = str(row['Nirf_Ranking']) if pd.notna(row['Nirf_Ranking']) else 0
+                        
+                        result['composite_score'] = calculate_composite_score(row, data.get('options', []))
                         results.append(result)
                     except Exception as e:
                         logger.error(f"Error processing row: {e}")

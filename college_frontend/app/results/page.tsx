@@ -11,6 +11,7 @@ interface Result {
     composite_score: number;
     fees?: number;
     distance?: number;
+    nirf_ranking?: number;
 }
 
 export default function ResultsPage() {
@@ -56,6 +57,7 @@ export default function ResultsPage() {
                                     <th className="border p-4">Closing Rank</th>
                                     {selectedOptions.includes("Distance") && <th className="border p-4">Distance (km)</th>}
                                     {selectedOptions.includes("Fees") && <th className="border p-4">Fees</th>}
+                                    {selectedOptions.includes("NIRF") && <th className="border p-4">NIRF Ranking</th>}
                                     <th className="border p-4">Composite Score</th>
                                 </tr>
                             </thead>
@@ -73,6 +75,9 @@ export default function ResultsPage() {
                                         )}
                                         {selectedOptions.includes("Fees") && (
                                             <td className="border p-4 text-gray-900">₹{result.fees?.toLocaleString()}</td>
+                                        )}
+                                        {selectedOptions.includes("NIRF") && (
+                                            <td className="border p-4 text-gray-900">{result.nirf_ranking}</td>
                                         )}
                                         <td className="border p-4 text-gray-900">{result.composite_score}</td>
                                     </tr>

@@ -23,6 +23,7 @@ interface Result {
   composite_score: number
   fees?: number
   distance?: number
+  nirf_ranking?: number
 }
 
 export default function FilterPage() {
@@ -315,6 +316,19 @@ export default function FilterPage() {
                 />
                 <span className="ml-2">Distance</span>
               </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  value="NIRF"
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setSelectedOptions((prev) =>
+                      prev.includes(value) ? prev.filter((option) => option !== value) : [...prev, value],
+                    )
+                  }}
+                />
+                <span className="ml-2">NIRF Ranking</span>
+              </label>
             </div>
           </div>
           <button
@@ -336,6 +350,7 @@ export default function FilterPage() {
                   <th className="border p-2">Closing Rank</th>
                   {selectedOptions.includes("Distance") && <th className="border p-2">Distance (km)</th>}
                   {selectedOptions.includes("Fees") && <th className="border p-2">Fees</th>}
+                  {selectedOptions.includes("NIRF") && <th className="border p-2">NIRF Ranking</th>}
                   <th className="border p-2">Composite Score</th>
                 </tr>
               </thead>
@@ -347,6 +362,7 @@ export default function FilterPage() {
                     <td className="border p-2">{result.closing_rank}</td>
                     {selectedOptions.includes("Distance") && <td className="border p-2">{result.distance}</td>}
                     {selectedOptions.includes("Fees") && <td className="border p-2">{result.fees}</td>}
+                    {selectedOptions.includes("NIRF") && <td className="border p-2">{result.nirf_ranking}</td>}
                     <td className="border p-2">{result.composite_score}</td>
                   </tr>
                 ))}
