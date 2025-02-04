@@ -7,37 +7,33 @@ from geopy.distance import geodesic
 def get_data_files(institution_type):
     if institution_type == 'IIT':
         return {
-            'orcr': 'iit_orcr.xlsx',
-            'fee': 'iit_fee.xlsx',
-            'geodata': 'iit_geodata.xlsx'
+            'combined': 'iit_combined.xlsx'
         }
     elif institution_type == 'NIT':
         return {
-            'orcr': 'nit_orcr.xlsx',
-            'fee': 'nit_fee.xlsx',
-            'geodata': 'nit_geodata.xlsx'
+            'combined': 'nit_combined.xlsx'
         }
     elif institution_type == 'IIIT':
         return {
-            'orcr': 'iiit_orcr.xlsx',
-            'fee': 'iiit_fee.xlsx',
-            'geodata': 'iiit_geodata.xlsx'
+            'combined': 'iiit_combined.xlsx'
         }
     return None  # Return None for invalid institution types
 
 # Calculate min/max values considering all institution types
 def calculate_min_max_values():
-    iit_orcr = pd.read_excel('iit_orcr.xlsx')
-    nit_orcr = pd.read_excel('nit_orcr.xlsx')
-    iiit_orcr = pd.read_excel('iiit_orcr.xlsx')
-    iit_fee = pd.read_excel('iit_fee.xlsx')
-    nit_fee = pd.read_excel('nit_fee.xlsx')
-    iiit_fee = pd.read_excel('iiit_fee.xlsx')
+    iit_data = pd.read_excel('iit_combined.xlsx')
+    nit_data = pd.read_excel('nit_combined.xlsx')
+    iiit_data = pd.read_excel('iiit_combined.xlsx')
 
-    min_closing_rank = min(iit_orcr['Closing_Rank'].min(), nit_orcr['Closing_Rank'].min(), iiit_orcr['Closing_Rank'].min())
-    max_closing_rank = max(iit_orcr['Closing_Rank'].max(), nit_orcr['Closing_Rank'].max(), iiit_orcr['Closing_Rank'].max())
-    min_fee = min(iit_fee['Fees_2023_per_sem'].min(), nit_fee['Fees_2023_per_sem'].min(), iiit_fee['Fees_2023_per_sem'].min())
-    max_fee = max(iit_fee['Fees_2023_per_sem'].max(), nit_fee['Fees_2023_per_sem'].max(), iiit_fee['Fees_2023_per_sem'].max())
+    # Rename fees column for consistency in all dataframes
+    iit_data = iit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
+    nit_data = nit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
+    iiit_data = iiit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
+
+    min_closing_rank = min(iit_data['Closing_Rank'].min(), nit_data['Closing_Rank'].min(), iiit_data['Closing_Rank'].min())
+    max_closing_rank = max(iit_data['Closing_Rank'].max(), nit_data['Closing_Rank'].max(), iiit_data['Closing_Rank'].max())
+    min_fee = min(iit_data['Fees'].min(), nit_data['Fees'].min(), iiit_data['Fees'].min())
+    max_fee = max(iit_data['Fees'].max(), nit_data['Fees'].max(), iiit_data['Fees'].max())
 
     return min_closing_rank, max_closing_rank, min_fee, max_fee
 
@@ -49,9 +45,9 @@ def import_data():
 
     # Check if files exist - as a precautionary measure
     files = [
-        'iit_orcr.xlsx', 'iit_fee.xlsx', 'iit_geodata.xlsx',
-        'nit_orcr.xlsx', 'nit_fee.xlsx', 'nit_geodata.xlsx',
-        'iiit_orcr.xlsx', 'iiit_fee.xlsx', 'iiit_geodata.xlsx',
+        'iit_combined.xlsx',
+        'nit_combined.xlsx',
+        'iiit_combined.xlsx',
         'Geo_data_INDIA_all_cities.xlsx'
     ]
     for file in files:
@@ -62,14 +58,10 @@ def import_data():
     # Read all Excel files
     try:
         print("Reading Excel files...")
-        orcr_df = pd.read_excel('iit_orcr.xlsx')
-        fee_df = pd.read_excel('iit_fee.xlsx')
-        geodata_df = pd.read_excel('iit_geodata.xlsx')
+        combined_df = pd.read_excel('iit_combined.xlsx')
         cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')
 
-        print(f"ORCR data shape: {orcr_df.shape}")
-        print(f"Fee data shape: {fee_df.shape}")
-        print(f"Geodata shape: {geodata_df.shape}")
+        print(f"Combined data shape: {combined_df.shape}")
         print(f"Cities data shape: {cities_df.shape}")
     except Exception as e:
         print(f"Error reading Excel files: {str(e)}")
@@ -77,10 +69,10 @@ def import_data():
     
     # Extract min and max values for closing_rank and fee
     try:
-        min_closing_rank = orcr_df['Closing_Rank'].min()
-        max_closing_rank = orcr_df['Closing_Rank'].max()
-        min_fee = fee_df['Fees_2023_per_sem'].min()
-        max_fee = fee_df['Fees_2023_per_sem'].max()
+        min_closing_rank = combined_df['Closing_Rank'].min()
+        max_closing_rank = combined_df['Closing_Rank'].max()
+        min_fee = combined_df['Fees'].min()
+        max_fee = combined_df['Fees'].max()
 
         print(f"Min Closing Rank: {min_closing_rank}")
         print(f"Max Closing Rank: {max_closing_rank}")
@@ -97,7 +89,7 @@ def import_data():
     print("Importing Institute data...")
     try:
         institutes = []
-        for index, row in geodata_df.iterrows():
+        for index, row in combined_df.iterrows():
             try:
                 institute = Institute(
                     name=row['Institute'],
@@ -117,13 +109,13 @@ def import_data():
         return
 
     # Creating a dictionary of fees
-    institute_fees = dict(zip(fee_df['Institute'], fee_df['Fees_2023_per_sem']))
+    institute_fees = dict(zip(combined_df['Institute'], combined_df['Fees']))
 
     # Import Branch data
     print("Importing Branch data...")
     try:
         branches = []
-        for index, row in orcr_df.iterrows():
+        for index, row in combined_df.iterrows():
             try:
                 # Filter to find the correct institute by name
                 institutes = Institute.objects.filter(name=row['Institute'])

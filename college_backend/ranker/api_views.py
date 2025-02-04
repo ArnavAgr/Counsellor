@@ -46,8 +46,8 @@ def get_branches(request):
             if not files:
                 raise ValueError(f"Could not find data files for institution type: {institution_type}")
             
-            branches_df = pd.read_excel(files['orcr'])
-            branches.extend([{'name': str(branch)} for branch in sorted(branches_df['Branch'].unique())])
+            combined_df = pd.read_excel(files['combined'])
+            branches.extend([{'name': str(branch)} for branch in sorted(combined_df['Branch'].unique())])
         
         branches = sorted({branch['name'] for branch in branches})  # Remove duplicates and sort
         print(f"Found {len(branches)} branches for {institution_types}")

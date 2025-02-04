@@ -81,85 +81,32 @@ def rank_colleges(request):
                 institution_types.extend(['NIT', 'IIIT'])
             
             try:
-                # Load DataFrames
-                orcr_dfs = []
-                fee_dfs = []
-                geodata_dfs = []
+                # Load DataFrames from combined files
+                combined_dfs = []
                 for institution_type in institution_types:
                     files = get_data_files(institution_type)
-                    orcr_dfs.append(pd.read_excel(files['orcr']))
-                    fee_dfs.append(pd.read_excel(files['fee']))
-                    geodata_dfs.append(pd.read_excel(files['geodata']))
+                    df = pd.read_excel(files['combined'])
+                    # Rename fees column for consistency
+                    df = df.rename(columns={'Fees_2023_per_sem': 'Fees'})
+                    combined_dfs.append(df)
                 
-                orcr_df = pd.concat(orcr_dfs, ignore_index=True)
-                fee_df = pd.concat(fee_dfs, ignore_index=True)
-                geodata_df = pd.concat(geodata_dfs, ignore_index=True)
+                # Concatenate all dataframes
+                merged_df = pd.concat(combined_dfs, ignore_index=True)
                 cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')
 
                 # Clean column names
-                orcr_df.columns = [col.strip().title() for col in orcr_df.columns]
-                fee_df.columns = [col.strip().title() for col in fee_df.columns]
-                geodata_df.columns = [col.strip().title() for col in geodata_df.columns]
+                merged_df.columns = [col.strip().title() for col in merged_df.columns]
 
-                # Log column names for debugging
-                logger.info("Column names in fee DataFrame:")
-                logger.info(fee_df.columns.tolist())
-
-                # Find the fees column name
-                fee_column = None
-                possible_fee_columns = ['Fees', 'Fees_2023_Per_Sem', 'Fees_2023_Per_Sem']
-                for col in possible_fee_columns:
-                    if col in fee_df.columns:
-                        fee_column = col
-                        break
-
-                if not fee_column:
-                    raise ValueError(f"Could not find fees column. Available columns: {fee_df.columns.tolist()}")
-
-                # Filter ORCR data by category and gender first
+                # Filter by category and gender first
                 logger.info(f"Filtering for Category: {data['category']} and Gender: {data['gender']}")
-                filtered_orcr = orcr_df[(orcr_df['Category'] == data['category']) & (orcr_df['Gender'] == data['gender'])]
-                logger.info(f"Rows after category/gender filter: {len(filtered_orcr)}")
+                filtered_df = merged_df[(merged_df['Category'] == data['category']) & 
+                                     (merged_df['Gender'] == data['gender'])].copy()
+                logger.info(f"Rows after category/gender filter: {len(filtered_df)}")
 
                 # Filter by branch if specified
                 if data.get('branch_name'):
-                    filtered_orcr = filtered_orcr[filtered_orcr['Branch'] == data['branch_name']]
-                    logger.info(f"Rows after branch filter: {len(filtered_orcr)}")
-
-                # Create a unique list of institutes from filtered data
-                institutes = filtered_orcr['Institute'].unique()
-                logger.info(f"Number of unique institutes: {len(institutes)}")
-
-                # Filter fee and geodata DataFrames to only include relevant institutes
-                fee_df = fee_df[fee_df['Institute'].isin(institutes)]
-                geodata_df = geodata_df[geodata_df['Institute'].isin(institutes)]
-
-                # Rename fee column to 'Fees' for consistency
-                fee_df = fee_df.rename(columns={fee_column: 'Fees'})
-
-                # Merge the filtered data
-                try:
-                    # First merge: ORCR with Fees
-                    merged_df = pd.merge(
-                        filtered_orcr,
-                        fee_df[['Institute', 'Fees']],
-                        on='Institute',
-                        how='left'  # Changed to left join to keep all ORCR rows
-                    )
-                    logger.info(f"Rows after fee merge: {len(merged_df)}")
-
-                    # Second merge: with Geodata
-                    merged_df = pd.merge(
-                        merged_df,
-                        geodata_df[['Institute', 'Latitude', 'Longitude']],
-                        on='Institute',
-                        how='left'  # Changed to left join to keep all rows
-                    )
-                    logger.info(f"Rows after geodata merge: {len(merged_df)}")
-
-                except Exception as e:
-                    logger.error(f"Merge failed with error: {str(e)}")
-                    raise
+                    filtered_df = filtered_df[filtered_df['Branch'] == data.get('branch_name')].copy()
+                    logger.info(f"Rows after branch filter: {len(filtered_df)}")
 
                 # Get selected city data if Distance option is selected
                 if 'Distance' in data.get('options', []):
@@ -167,45 +114,37 @@ def rank_colleges(request):
                     if selected_city_data.empty:
                         raise ValueError("Selected city not found in the dataset")
                     selected_city_data = selected_city_data.iloc[0]
-
-                # Filter by fees if option is selected
-                if 'Fees' in data.get('options', []):
-                    before_fee_filter = len(merged_df)
-                    merged_df = merged_df[merged_df['Fees'] <= data['max_fees']]
-                    logger.info(f"Rows after fee filter: {len(merged_df)} (removed {before_fee_filter - len(merged_df)} rows)")
-
-                # Calculate distances if needed
-                if 'Distance' in data.get('options', []):
-                    merged_df['Distance'] = merged_df.apply(
+                    # Calculate distances
+                    filtered_df['Distance'] = filtered_df.apply(
                         lambda row: round(geodesic(
                             (selected_city_data['Latitude'], selected_city_data['Longitude']),
                             (row['Latitude'], row['Longitude'])
                         ).km, 0),
                         axis=1
                     )
-                    before_distance_filter = len(merged_df)
-                    merged_df = merged_df[merged_df['Distance'] <= data['max_distance']]
-                    logger.info(f"Rows after distance filter: {len(merged_df)} (removed {before_distance_filter - len(merged_df)} rows)")
 
                 # Process results
                 results = []
-                for _, row in merged_df.iterrows():
-                    result = {
-                        'institute': row['Institute'],
-                        'branch': row['Branch'],
-                        'closing_rank': row['Closing_Rank'],
-                        'composite_score': 0
-                    }
-                    
-                    if 'Fees' in data.get('options', []):
-                        result['fees'] = row['Fees']
-                    
-                    if 'Distance' in data.get('options', []):
-                        result['distance'] = row['Distance']
-                    
-                    results.append(result)
-
-                logger.info(f"Final number of results: {len(results)}")
+                for _, row in filtered_df.iterrows():
+                    try:
+                        result = {
+                            'institute': str(row['Institute']),
+                            'branch': str(row['Branch']),
+                            'closing_rank': int(row['Closing_Rank']),
+                            'composite_score': 0
+                        }
+                        
+                        if 'Fees' in data.get('options', []):
+                            result['fees'] = int(row['Fees']) if pd.notna(row['Fees']) else 0
+                        
+                        if 'Distance' in data.get('options', []):
+                            result['distance'] = int(row['Distance']) if pd.notna(row['Distance']) else 0
+                        
+                        results.append(result)
+                    except Exception as e:
+                        logger.error(f"Error processing row: {e}")
+                        logger.error(f"Row data: {row}")
+                        continue
 
                 # Calculate composite scores
                 if results:
