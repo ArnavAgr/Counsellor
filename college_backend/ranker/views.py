@@ -124,6 +124,20 @@ def rank_colleges(request):
                     df = df.rename(columns={'Fees_2023_per_sem': 'Fees'})
                     combined_dfs.append(df)
                 
+                # NEW: Filter for NIT rows based on home_state if provided
+                if data.get('home_state'):
+                    home_state = data.get('home_state')
+                    filtered_dfs = []
+                    for df in combined_dfs:
+                        if 'State' in df.columns and 'State_Quota' in df.columns:
+                            # For rows matching home_state, pick HS; for others, pick OS
+                            df_filtered = df[((df['State'] == home_state) & (df['State_Quota'] == "HS")) | 
+                                             ((df['State'] != home_state) & (df['State_Quota'] == "OS"))]
+                            filtered_dfs.append(df_filtered)
+                        else:
+                            filtered_dfs.append(df)
+                    combined_dfs = filtered_dfs
+                
                 # Concatenate all dataframes
                 merged_df = pd.concat(combined_dfs, ignore_index=True)
                 cities_df = pd.read_excel('Geo_data_INDIA_all_cities.xlsx')

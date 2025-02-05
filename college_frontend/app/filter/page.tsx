@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getCities, getBranches, rankColleges } from "../services/api"
+import { getCities, getBranches, rankColleges, getStates } from "../services/api"
 import Header from "../components/Header"
 
 interface City {
@@ -49,6 +49,8 @@ export default function FilterPage() {
     distance: 0.2,
     nirf: 0.4
   })
+  const [states, setStates] = useState<string[]>([])
+  const [selectedHomeState, setSelectedHomeState] = useState<string>("")
   const router = useRouter()
 
   // Ensure this component runs only on the client
@@ -82,6 +84,18 @@ export default function FilterPage() {
     }
   }
 
+  // Update the fetchStates function to use the API service
+  const fetchStates = async () => {
+    try {
+      const statesData = await getStates();
+      console.log("Fetched states:", statesData); // Debug log
+      setStates(Array.isArray(statesData) ? statesData : []);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
+    }
+  };
+
   const handleCitySelect = (cityName: string) => {
     setSelectedCityName(cityName);
     setShowDropdown(false); // Hide dropdown after selection
@@ -91,13 +105,35 @@ export default function FilterPage() {
     fetchBranches()
   }, [selectedInstitutionTypes])
 
+  useEffect(() => {
+    if (selectedInstitutionTypes.includes('NIT') || selectedInstitutionTypes.includes('NIT+IIIT')) {
+      fetchStates()
+    } else {
+      setStates([])
+      setSelectedHomeState("")
+    }
+  }, [selectedInstitutionTypes])
+
+  // Add requirement flag for home state
+  const requiresHomeState = selectedInstitutionTypes.includes('NIT') || selectedInstitutionTypes.includes('NIT+IIIT');
+
   const handleInstitutionTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSelectedInstitutionTypes([value]) // Only allow one selection
+    // Reset home state when changing institution type
+    if (!['NIT', 'NIT+IIIT'].includes(value)) {
+      setSelectedHomeState("");
+    }
   }
 
   const handleRankColleges = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Add validation for home state
+    if (requiresHomeState && !selectedHomeState) {
+      setError("Home state must be selected for NIT/NIT+IIIT")
+      return
+    }
     if (selectedOptions.includes("Distance") && selectedCityName === null) {
       setError("City must be selected if Distance is chosen")
       return
@@ -113,6 +149,7 @@ export default function FilterPage() {
       ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {})
     }
 
+    // Update the handleRankColleges data to include home_state
     const data = {
       institution_types: selectedInstitutionTypes,
       city: selectedCityName,
@@ -121,8 +158,8 @@ export default function FilterPage() {
       category: selectedCategory,
       gender: selectedGender,
       useCustomWeights,
+      home_state: selectedHomeState || undefined,  // Include home state in request
       weights: useCustomWeights ? relevantWeights : undefined,
-      // Always include max values when corresponding options are selected
       ...(selectedOptions.includes('Fees') && { max_fees: maxFees }),
       ...(selectedOptions.includes('Distance') && { max_distance: maxDistance })
     }
@@ -184,6 +221,27 @@ export default function FilterPage() {
               ))}
             </div>
           </div>
+          {requiresHomeState && (
+            <div className="mb-4">
+              <label htmlFor="homeState" className="block mb-2 font-semibold text-gray-700">
+                Select Home State
+              </label>
+              <select
+                id="homeState"
+                value={selectedHomeState}
+                onChange={(e) => setSelectedHomeState(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required={requiresHomeState}
+              >
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
   {}
   <div className="relative">

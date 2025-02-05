@@ -1,6 +1,6 @@
 export const getCities = async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
     try {
         const response = await fetch('http://localhost:8000/api/cities/', {
@@ -26,7 +26,7 @@ export const getCities = async () => {
 
 export const getBranches = async (institutionTypes) => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
     try {
         const queryParams = institutionTypes.map(type => `institution_types=${encodeURIComponent(type)}`).join('&');
@@ -82,5 +82,32 @@ export const rankColleges = async (data) => {
             console.error('Error in rankColleges:', error);
         }
         throw error;
+    }
+};
+
+// Add the getStates function
+export const getStates = async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+    try {
+        const response = await fetch('http://localhost:8000/api/states/', {
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.error('Request timed out');
+        } else {
+            console.error('Error fetching states:', error);
+        }
+        return [];
     }
 };

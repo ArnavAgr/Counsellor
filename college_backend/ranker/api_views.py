@@ -56,6 +56,15 @@ def get_branches(request):
         print(f"Error in get_branches: {str(e)}")
         return Response({'error': str(e)}, status=500)
 
+@api_view(['GET'])
+def get_states(request):
+    try:
+        df = pd.read_excel('nit_combined.xlsx')
+        unique_states = sorted(df['State'].dropna().unique())
+        return Response(unique_states)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+
 @api_view(['POST'])
 def rank_colleges_api(request):
     return rank_colleges(request)
