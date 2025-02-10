@@ -61,7 +61,7 @@ def calculate_composite_score(branch, options, use_custom_weights=False, custom_
     # Ensure score is between 1 and 10
     normalized_score = max(1, min(10, normalized_score))
     
-    return round(normalized_score, 2)
+    return round(normalized_score, 10)
 
 def calculate_distance_scores(distances):
     """Convert raw distances to scores where shorter distances get higher scores"""
@@ -249,7 +249,7 @@ def rank_colleges(request):
                         results[0]['composite_score'] = 10
 
                     # Sort results by normalized composite score
-                    results.sort(key=lambda x: x['composite_score'], reverse=True)
+                    results.sort(key=lambda x: (x['composite_score'], -x['closing_rank']), reverse=True)
 
                 return JsonResponse({'results': results, 'options': data.get('options', [])})
 
