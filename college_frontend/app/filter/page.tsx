@@ -1,8 +1,8 @@
 "use client" // Ensures this page is rendered only on the client
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react" // Add useCallback
 import { useRouter } from "next/navigation"
-import { getCities, getBranches, rankColleges, getStates } from "../services/api"
+import { getCities, getBranches, rankColleges, getStates } from "../services/api.js" // Update to reference api.js
 import Header from "../components/Header"
 
 interface City {
@@ -29,7 +29,6 @@ interface Result {
 export default function FilterPage() {
   const [cities, setCities] = useState<City[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
-  const [results, setResults] = useState<Result[]>([])
   const [selectedCityName, setSelectedCityName] = useState<string | null>(null)
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
   const [maxFees, setMaxFees] = useState<number>(300000)
@@ -51,6 +50,7 @@ export default function FilterPage() {
   })
   const [states, setStates] = useState<string[]>([])
   const [selectedHomeState, setSelectedHomeState] = useState<string>("")
+  const [results] = useState<Result[]>([]) // Remove setResults as it's not used
   const router = useRouter()
 
   // Ensure this component runs only on the client
@@ -73,7 +73,8 @@ export default function FilterPage() {
     fetchCities()
   }, []) // Remove selectedInstitutionType dependency since cities are same for both
 
-  const fetchBranches = async () => {
+  // Move fetchBranches into useCallback
+  const fetchBranches = useCallback(async () => {
     try {
       const branchesData = await getBranches(selectedInstitutionTypes)
       console.log("Fetched branches:", branchesData) // Debug log
@@ -82,7 +83,7 @@ export default function FilterPage() {
       console.error("Error fetching branches:", error)
       setBranches([])
     }
-  }
+  }, [selectedInstitutionTypes]) // Add dependency
 
   // Update the fetchStates function to use the API service
   const fetchStates = async () => {
@@ -101,9 +102,10 @@ export default function FilterPage() {
     setShowDropdown(false); // Hide dropdown after selection
   };
 
+  // Update useEffect to use memoized fetchBranches
   useEffect(() => {
     fetchBranches()
-  }, [selectedInstitutionTypes])
+  }, [fetchBranches])
 
   useEffect(() => {
     if (selectedInstitutionTypes.includes('NIT') || selectedInstitutionTypes.includes('NIT+IIIT')) {
@@ -540,7 +542,7 @@ export default function FilterPage() {
                 </tr>
               </thead>
               <tbody>
-                {results.map((result: Result, index) => (
+                {results.map((result: Result) => ( // Add type annotation for result parameter
                   <tr key={`${result.institute}-${result.branch}`}>
                     <td className="border p-2">{result.institute}</td>
                     <td className="border p-2">{result.branch}</td>

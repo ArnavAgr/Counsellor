@@ -1,8 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { rankColleges } from "../services/api";
+import { useEffect, useState, Suspense } from "react"; // Add Suspense
+import { rankColleges } from "../services/api.js";
 
 interface Result {
     institute: string;
@@ -14,10 +14,9 @@ interface Result {
     nirf_ranking?: number;
 }
 
-export default function ResultsPage() {
+function ResultsContent() {
     const searchParams = useSearchParams();
     const [results, setResults] = useState<Result[]>([]);
-    const [filters, setFilters] = useState<any>({});
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
     useEffect(() => {
@@ -26,7 +25,6 @@ export default function ResultsPage() {
                 const filtersFromParams = JSON.parse(
                     decodeURIComponent(searchParams.get("filters") || "{}")
                 );
-                setFilters(filtersFromParams);
                 setSelectedOptions(filtersFromParams.options || []);
 
                 const resultsData = await rankColleges(filtersFromParams);
@@ -92,5 +90,18 @@ export default function ResultsPage() {
                 )}
             </main>
         </div>
+    );
+}
+
+// Wrap the component that uses useSearchParams in Suspense
+export default function ResultsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <p className="text-center text-gray-700 text-lg font-semibold">Loading...</p>
+            </div>
+        }>
+            <ResultsContent />
+        </Suspense>
     );
 }

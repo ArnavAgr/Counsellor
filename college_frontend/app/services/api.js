@@ -85,7 +85,7 @@ export const rankColleges = async (data) => {
     }
 };
 
-// Add the getStates function
+// Fetch states from the backend (unique states from nit_combined.xlsx)
 export const getStates = async () => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
