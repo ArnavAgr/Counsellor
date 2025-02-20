@@ -242,7 +242,7 @@ def rank_colleges(request):
                                 10 * (result['composite_score'] - min_score) / (max_score - min_score)
                                 if max_score != min_score
                                 else 10,  # If all scores are the same, assign 10
-                                2
+                                3
                             )
                     else:
                         # If there's only one result, give it a score of 10
