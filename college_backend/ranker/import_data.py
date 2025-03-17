@@ -17,6 +17,10 @@ def get_data_files(institution_type):
         return {
             'combined': 'iiit_combined.xlsx'
         }
+    elif institution_type == 'GFTI':
+        return {
+            'combined': 'gfti_combined.xlsx'
+        }
     return None  # Return None for invalid institution types
 
 # Calculate min/max values considering all institution types
@@ -24,16 +28,22 @@ def calculate_min_max_values():
     iit_data = pd.read_excel('iit_combined.xlsx')
     nit_data = pd.read_excel('nit_combined.xlsx')
     iiit_data = pd.read_excel('iiit_combined.xlsx')
+    gfti_data = pd.read_excel('gfti_combined.xlsx')
 
     # Rename fees column for consistency in all dataframes
     iit_data = iit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
     nit_data = nit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
     iiit_data = iiit_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
+    gfti_data = gfti_data.rename(columns={'Fees_2023_per_sem': 'Fees'})
 
-    min_closing_rank = min(iit_data['Closing_Rank'].min(), nit_data['Closing_Rank'].min(), iiit_data['Closing_Rank'].min())
-    max_closing_rank = max(iit_data['Closing_Rank'].max(), nit_data['Closing_Rank'].max(), iiit_data['Closing_Rank'].max())
-    min_fee = min(iit_data['Fees'].min(), nit_data['Fees'].min(), iiit_data['Fees'].min())
-    max_fee = max(iit_data['Fees'].max(), nit_data['Fees'].max(), iiit_data['Fees'].max())
+    min_closing_rank = min(iit_data['Closing_Rank'].min(), nit_data['Closing_Rank'].min(), 
+                          iiit_data['Closing_Rank'].min(), gfti_data['Closing_Rank'].min())
+    max_closing_rank = max(iit_data['Closing_Rank'].max(), nit_data['Closing_Rank'].max(), 
+                          iiit_data['Closing_Rank'].max(), gfti_data['Closing_Rank'].max())
+    min_fee = min(iit_data['Fees'].min(), nit_data['Fees'].min(), 
+                  iiit_data['Fees'].min(), gfti_data['Fees'].min())
+    max_fee = max(iit_data['Fees'].max(), nit_data['Fees'].max(), 
+                  iiit_data['Fees'].max(), gfti_data['Fees'].max())
 
     return min_closing_rank, max_closing_rank, min_fee, max_fee
 

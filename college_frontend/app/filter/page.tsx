@@ -1,3 +1,4 @@
+
 "use client" // Ensures this page is rendered only on the client
 
 import { useEffect, useState, useCallback } from "react" // Add useCallback
@@ -107,8 +108,9 @@ export default function FilterPage() {
     fetchBranches()
   }, [fetchBranches])
 
+  // Update the useEffect for fetching states to include GFTI
   useEffect(() => {
-    if (selectedInstitutionTypes.includes('NIT') || selectedInstitutionTypes.includes('NIT+IIIT')) {
+    if (selectedInstitutionTypes.some(type => ['NIT', 'GFTI', 'NIT+IIIT'].includes(type))) {
       fetchStates()
     } else {
       setStates([])
@@ -116,14 +118,16 @@ export default function FilterPage() {
     }
   }, [selectedInstitutionTypes])
 
-  // Add requirement flag for home state
-  const requiresHomeState = selectedInstitutionTypes.includes('NIT') || selectedInstitutionTypes.includes('NIT+IIIT');
+  // Update the requirement flag for home state to include GFTI
+  const requiresHomeState = selectedInstitutionTypes.some(type => 
+    ['NIT', 'GFTI', 'NIT+IIIT'].includes(type)
+  );
 
   const handleInstitutionTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSelectedInstitutionTypes([value]) // Only allow one selection
-    // Reset home state when changing institution type
-    if (!['NIT', 'NIT+IIIT'].includes(value)) {
+    // Reset home state when changing institution type to non-home state requiring type
+    if (!['NIT', 'GFTI', 'NIT+IIIT'].includes(value)) {
       setSelectedHomeState("");
     }
   }
@@ -131,9 +135,9 @@ export default function FilterPage() {
   const handleRankColleges = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Add validation for home state
+    // Update validation for home state to include GFTI
     if (requiresHomeState && !selectedHomeState) {
-      setError("Home state must be selected for NIT/NIT+IIIT")
+      setError("Home state must be selected for NIT/GFTI/NIT+IIIT")
       return
     }
     if (selectedOptions.includes("Distance") && selectedCityName === null) {
@@ -209,7 +213,7 @@ export default function FilterPage() {
           <div className="mb-4">
             <label className="block mb-2 font-semibold text-gray-700">Select Institution Type</label>
             <div className="flex flex-col space-y-2">
-              {["IIT", "NIT", "IIIT", "NIT+IIIT"].map((type) => (
+              {["IIT", "NIT", "IIIT", "GFTI", "NIT+IIIT"].map((type) => (
                 <label key={type} className="flex items-center">
                   <input
                     type="checkbox"
@@ -560,7 +564,7 @@ export default function FilterPage() {
       </main>
       <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2023 JEE College Finder. All rights reserved.</p>
+          <p>&copy; 2025 JEE College Finder. All rights reserved.</p>
         </div>
       </footer>
     </div>

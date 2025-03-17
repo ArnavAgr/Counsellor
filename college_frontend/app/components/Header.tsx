@@ -32,7 +32,20 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              
+              <Link
+                href="/disclaimer"
+                className="text-gray-600 hover:text-blue-600 transition duration-300"
+              >
+                Disclaimer
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/feedback"
+                className="text-gray-600 hover:text-blue-600 transition duration-300"
+              >
+                Feedback
+              </Link>
             </li>
           </ul>
         </nav>
@@ -85,7 +98,22 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              
+              <Link
+                href="/disclaimer"
+                className="block text-gray-600 hover:text-blue-600 transition duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Disclaimer
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/feedback"
+                className="block text-gray-600 hover:text-blue-600 transition duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Feedback
+              </Link>
             </li>
           </ul>
         </nav>

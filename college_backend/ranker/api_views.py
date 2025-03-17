@@ -31,10 +31,10 @@ def get_cities(request):
 def get_branches(request):
     try:
         institution_types = request.query_params.getlist('institution_types', ['NIT'])
-        valid_types = ['NIT', 'IIIT', 'IIT']
+        valid_types = ['NIT', 'IIIT', 'IIT', 'GFTI']
         for institution_type in institution_types:
             if institution_type not in valid_types and institution_type != 'NIT+IIIT':
-                raise ValueError(f"Invalid institution type: {institution_type}. Must be one of: NIT, IIIT, IIT, NIT+IIIT")
+                raise ValueError(f"Invalid institution type: {institution_type}. Must be one of: NIT, IIIT, IIT, GFTI, NIT+IIIT")
         
         branches = []
         if 'NIT+IIIT' in institution_types:
@@ -59,8 +59,14 @@ def get_branches(request):
 @api_view(['GET'])
 def get_states(request):
     try:
-        df = pd.read_excel('nit_combined.xlsx')
-        unique_states = sorted(df['State'].dropna().unique())
+        # Read both NIT and GFTI files and combine states
+        nit_df = pd.read_excel('nit_combined.xlsx')
+        gfti_df = pd.read_excel('gfti_combined.xlsx')
+        
+        # Combine states from both files and remove duplicates
+        all_states = pd.concat([nit_df['State'], gfti_df['State']]).dropna().unique()
+        unique_states = sorted(all_states)
+        
         return Response(unique_states)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
