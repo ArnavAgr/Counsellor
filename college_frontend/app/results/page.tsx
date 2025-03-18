@@ -48,8 +48,9 @@ function ResultsContent() {
                 {results.length > 0 ? (
                     <div className="overflow-x-auto shadow-lg rounded-lg">
                         <table className="w-full border-collapse bg-white rounded-lg shadow-md">
-                            <thead className="bg-blue-600 text-white">
+                            <thead className="bg-blue-700 text-white text-lg font-bold">
                                 <tr>
+                                    <th className="border p-2">S.No.</th>
                                     <th className="border p-4">Institute</th>
                                     <th className="border p-4">Branch</th>
                                     <th className="border p-4">Closing Rank</th>
@@ -60,11 +61,12 @@ function ResultsContent() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {results.map((result: Result, index) => (
+                                {results.map((result: Result, index: number) => (
                                     <tr
                                         key={`${result.institute}-${result.branch}`}
                                         className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
                                     >
+                                        <td className="border p-4 text-center text-gray-900">{index + 1}</td>
                                         <td className="border p-4 text-gray-900">{result.institute}</td>
                                         <td className="border p-4 text-gray-900">{result.branch}</td>
                                         <td className="border p-4 text-gray-900">{result.closing_rank}</td>

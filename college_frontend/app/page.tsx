@@ -134,7 +134,7 @@ export default function Home() {
       </main>
       <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; 2023 JEE College Finder. All rights reserved.</p>
+          <p>&copy; 2025 CollegeChayan. All rights reserved.</p>
         </div>
       </footer>
       {showScrollTop && (
