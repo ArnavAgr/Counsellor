@@ -1,4 +1,3 @@
-
 "use client" // Ensures this page is rendered only on the client
 
 import { useEffect, useState, useCallback } from "react" // Add useCallback
@@ -123,11 +122,11 @@ export default function FilterPage() {
     ['NIT', 'GFTI', 'NIT+IIIT'].includes(type)
   );
 
-  const handleInstitutionTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSelectedInstitutionTypes([value]) // Only allow one selection
+  // Update the handler to work with direct value instead of event
+  const handleInstitutionTypeChange = (type: string) => {
+    setSelectedInstitutionTypes([type]) // Only allow one selection
     // Reset home state when changing institution type to non-home state requiring type
-    if (!['NIT', 'GFTI', 'NIT+IIIT'].includes(value)) {
+    if (!['NIT', 'GFTI', 'NIT+IIIT'].includes(type)) {
       setSelectedHomeState("");
     }
   }
@@ -210,27 +209,33 @@ export default function FilterPage() {
           onSubmit={handleRankColleges}
           className="w-full bg-white p-8 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold text-gray-700">Select Institution Type</label>
-            <div className="flex flex-col space-y-2">
-              {["IIT", "NIT", "IIIT", "GFTI", "NIT+IIIT"].map((type) => (
-                <label key={type} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={type}
-                    checked={selectedInstitutionTypes.includes(type)}
-                    onChange={handleInstitutionTypeChange}
-                    className="mr-2"
-                  />
+          {/* Replace the old institution type section with this new one */}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Select Institution Type*
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {["IIT", "NIT", "IIIT", "GFTI", "NIT+IIIT"].map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => handleInstitutionTypeChange(type)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    selectedInstitutionTypes.includes(type)
+                      ? "bg-blue-600 text-white shadow-md transform scale-105"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
                   {type}
-                </label>
+                </button>
               ))}
             </div>
           </div>
+
           {requiresHomeState && (
             <div className="mb-4">
               <label htmlFor="homeState" className="block mb-2 font-semibold text-gray-700">
-                Select Home State
+                Select Home State*
               </label>
               <select
                 id="homeState"
@@ -286,7 +291,7 @@ export default function FilterPage() {
   {/* Category Selection */}
   <div>
     <label htmlFor="category" className="block mb-2 font-semibold text-gray-700">
-      Select Category
+      Select Category*
     </label>
     <select
       id="category"
@@ -311,7 +316,7 @@ export default function FilterPage() {
 
           <div className="mb-4">
             <label htmlFor="gender" className="block mb-2 font-semibold text-gray-700">
-              Select Gender
+              Select Gender*
             </label>
             <select
               id="gender"
@@ -324,7 +329,8 @@ export default function FilterPage() {
               <option value="Female-only (including Supernumerary)">Female-only (including Supernumerary)</option>
             </select>
           </div>
-          <div className="mb-4">
+          {/* Commenting out Max Fees slider */}
+          {/* <div className="mb-4">
             <label htmlFor="maxFees" className="block mb-2 font-semibold text-gray-700">
               Max Fees
             </label>
@@ -338,8 +344,10 @@ export default function FilterPage() {
               className="w-full"
             />
             <span>₹{maxFees.toLocaleString("en-IN")}</span>
-          </div>
-          <div className="mb-4">
+          </div> */}
+
+          {/* Commenting out Max Distance slider */}
+          {/* <div className="mb-4">
             <label htmlFor="maxDistance" className="block mb-2 font-semibold text-gray-700">
               Max Distance
             </label>
@@ -353,7 +361,7 @@ export default function FilterPage() {
               className="w-full"
             />
             <span>{maxDistance} km</span>
-          </div>
+          </div> */}
           <div className="mb-4">
             <label htmlFor="branch" className="block mb-2 font-semibold text-gray-700">
               Select Branch
