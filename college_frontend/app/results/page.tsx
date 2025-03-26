@@ -12,6 +12,9 @@ interface Result {
     fees?: number;
     distance?: number;
     nirf_ranking?: number;
+    highest_package?: number;
+    average_package?: number;
+    placement_percentage?: number;
 }
 
 function ResultsContent() {
@@ -57,6 +60,9 @@ function ResultsContent() {
                                     {selectedOptions.includes("Distance") && <th className="border p-4">Distance (km)</th>}
                                     {selectedOptions.includes("Fees") && <th className="border p-4">Fees</th>}
                                     {selectedOptions.includes("NIRF") && <th className="border p-4">NIRF Ranking</th>}
+                                    {selectedOptions.includes("Highest_Package") && <th className="border p-4">Highest Package (LPA)</th>}
+                                    {selectedOptions.includes("Average_Package") && <th className="border p-4">Average Package (LPA)</th>}
+                                    {selectedOptions.includes("Placement_Percentage") && <th className="border p-4">Placement %</th>}
                                     <th className="border p-4">Composite Score</th>
                                 </tr>
                             </thead>
@@ -78,6 +84,15 @@ function ResultsContent() {
                                         )}
                                         {selectedOptions.includes("NIRF") && (
                                             <td className="border p-4 text-gray-900">{result.nirf_ranking}</td>
+                                        )}
+                                        {selectedOptions.includes("Highest_Package") && (
+                                            <td className="border p-4 text-gray-900">{result.highest_package?.toFixed(2)}</td>
+                                        )}
+                                        {selectedOptions.includes("Average_Package") && (
+                                            <td className="border p-4 text-gray-900">{result.average_package?.toFixed(2)}</td>
+                                        )}
+                                        {selectedOptions.includes("Placement_Percentage") && (
+                                            <td className="border p-4 text-gray-900">{result.placement_percentage?.toFixed(1)}%</td>
                                         )}
                                         <td className="border p-4 text-gray-900">{result.composite_score}</td>
                                     </tr>

@@ -16,49 +16,108 @@ weight4 = 0.5
 weight5 = 0.4
 weight6 = 0.1
 
+def calculate_min_max_values():
+    try:
+        # Load all data files
+        iit_data = pd.read_excel('iit_combined.xlsx')
+        nit_data = pd.read_excel('nit_combined.xlsx')
+        iiit_data = pd.read_excel('iiit_combined.xlsx')
+        gfti_data = pd.read_excel('gfti_combined.xlsx')
 
-min_closing_rank, max_closing_rank, min_fee, max_fee = calculate_min_max_values()
+        # Print column names for debugging
+        logger.info(f"IIT data columns: {iit_data.columns.tolist()}")
+        logger.info(f"NIT data columns: {nit_data.columns.tolist()}")
+        logger.info(f"IIIT data columns: {iiit_data.columns.tolist()}")
+        logger.info(f"GFTI data columns: {gfti_data.columns.tolist()}")
+
+        # Ensure all dataframes have consistent column names
+        for df in [iit_data, nit_data, iiit_data, gfti_data]:
+            if 'Fees_2023_per_sem' in df.columns:
+                df.rename(columns={'Fees_2023_per_sem': 'Fees'}, inplace=True)
+
+        # Calculate all metrics
+        min_closing_rank = min(df['Closing_Rank'].min() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        max_closing_rank = max(df['Closing_Rank'].max() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        min_fee = min(df['Fees'].min() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        max_fee = max(df['Fees'].max() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        
+        # Use exact column names for placement data
+        min_highest_package = min(df['Highest_Package'].min() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        max_highest_package = max(df['Highest_Package'].max() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        min_avg_package = min(df['Average_Package'].min() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        max_avg_package = max(df['Average_Package'].max() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        min_placement = min(df['Placement_Percentage'].min() for df in [iit_data, nit_data, iiit_data, gfti_data])
+        max_placement = max(df['Placement_Percentage'].max() for df in [iit_data, nit_data, iiit_data, gfti_data])
+
+        return (min_closing_rank, max_closing_rank, min_fee, max_fee, 
+                min_highest_package, max_highest_package, min_avg_package, 
+                max_avg_package, min_placement, max_placement)
+
+    except Exception as e:
+        logger.error(f"Error calculating min/max values: {str(e)}")
+        logger.error("DataFrame columns:")
+        for name, df in [("IIT", iit_data), ("NIT", nit_data), ("IIIT", iiit_data), ("GFTI", gfti_data)]:
+            logger.error(f"{name} columns: {df.columns.tolist()}")
+        raise
+
+# Update the global variables with all values
+(min_closing_rank, max_closing_rank, min_fee, max_fee, 
+ min_highest_package, max_highest_package, min_avg_package, 
+ max_avg_package, min_placement, max_placement) = calculate_min_max_values()
 
 def calculate_composite_score(branch, options, use_custom_weights=False, custom_weights=None):
-    # Default weights if not using custom weights
     weights = {
         'rank': 0.7,
         'fees': 0.3,
         'distance': 0.2,
-        'nirf': 0.4
+        'nirf': 0.4,
+        'highest_package': 0.3,
+        'average_package': 0.3,
+        'placement_percentage': 0.3
     } if not use_custom_weights else custom_weights
 
     # Calculate individual scores (all normalized to 0-10 range)
     rank_score = 10 * (1 - ((branch['Closing_Rank'] - min_closing_rank) / (max_closing_rank - min_closing_rank)))
-    fee_score = 0
-    distance_score = 0
-    nirf_score = 0
+    
+    # Initialize additional scores
+    fee_score = distance_score = nirf_score = highest_package_score = avg_package_score = placement_score = 0
 
+    # Calculate scores for selected options
     if 'Fees' in options:
         fee_score = 10 * (1 - ((branch['Fees'] - min_fee) / (max_fee - min_fee)))
     if 'Distance' in options:
-        distance_score = branch['Distance_Score']  # Already normalized to 0-10
+        distance_score = branch['Distance_Score']
     if 'NIRF' in options:
-        nirf_score = branch['Nirf_Weightage']  # Already normalized to 0-10
+        nirf_score = branch['Nirf_Weightage']
+    if 'Highest_Package' in options:
+        highest_package_score = 10 * ((branch['Highest_Package'] - min_highest_package) / (max_highest_package - min_highest_package))
+    if 'Average_Package' in options:
+        avg_package_score = 10 * ((branch['Average_Package'] - min_avg_package) / (max_avg_package - min_avg_package))
+    if 'Placement_Percentage' in options:
+        placement_score = 10 * (branch['Placement_Percentage'] / 100)  # Assuming percentage is 0-100
 
-    # Calculate weighted sum
+    # Calculate weighted sum with all options
     total_score = weights['rank'] * rank_score
     total_weight = weights['rank']
 
-    if 'Fees' in options:
-        total_score += weights['fees'] * fee_score
-        total_weight += weights['fees']
-    if 'Distance' in options:
-        total_score += weights['distance'] * distance_score
-        total_weight += weights['distance']
-    if 'NIRF' in options:
-        total_score += weights['nirf'] * nirf_score
-        total_weight += weights['nirf']
+    # Add scores for selected options
+    option_scores = {
+        'Fees': (weights['fees'], fee_score),
+        'Distance': (weights['distance'], distance_score),
+        'NIRF': (weights['nirf'], nirf_score),
+        'Highest_Package': (weights['highest_package'], highest_package_score),
+        'Average_Package': (weights['average_package'], avg_package_score),
+        'Placement_Percentage': (weights['placement_percentage'], placement_score)
+    }
 
-    # Normalize final score to ensure it's in 1-10 range
+    for option in options:
+        if option in option_scores:
+            weight, score = option_scores[option]
+            total_score += weight * score
+            total_weight += weight
+
+    # Normalize final score
     normalized_score = (total_score / total_weight) if total_weight > 0 else rank_score
-    
-    # Ensure score is between 1 and 10
     normalized_score = max(1, min(10, normalized_score))
     
     return round(normalized_score, 10)
@@ -214,6 +273,14 @@ def rank_colleges(request):
                         
                         if 'NIRF' in data.get('options', []):
                             result['nirf_ranking'] = str(row['Nirf_Ranking']) if pd.notna(row['Nirf_Ranking']) else "Unranked"
+                        
+                        # Add placement data if selected
+                        if 'Highest_Package' in data.get('options', []):
+                            result['highest_package'] = float(row['Highest_Package']) if pd.notna(row['Highest_Package']) else 0
+                        if 'Average_Package' in data.get('options', []):
+                            result['average_package'] = float(row['Average_Package']) if pd.notna(row['Average_Package']) else 0
+                        if 'Placement_Percentage' in data.get('options', []):
+                            result['placement_percentage'] = float(row['Placement_Percentage']) if pd.notna(row['Placement_Percentage']) else 0
                         
                         # Calculate raw composite score
                         result['composite_score'] = calculate_composite_score(

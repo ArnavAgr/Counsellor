@@ -24,6 +24,9 @@ interface Result {
   fees?: number
   distance?: number
   nirf_ranking?: number
+  highest_package?: number;
+  average_package?: number;
+  placement_percentage?: number;
 }
 
 export default function FilterPage() {
@@ -46,7 +49,10 @@ export default function FilterPage() {
     rank: 0.7,
     fees: 0.3,
     distance: 0.2,
-    nirf: 0.4
+    nirf: 0.4,
+    highest_package: 0.3,
+    average_package: 0.3,
+    placement_percentage: 0.3
   })
   const [states, setStates] = useState<string[]>([])
   const [selectedHomeState, setSelectedHomeState] = useState<string>("")
@@ -151,7 +157,10 @@ export default function FilterPage() {
       rank: weights.rank,
       ...(selectedOptions.includes('Fees') ? { fees: weights.fees } : {}),
       ...(selectedOptions.includes('Distance') ? { distance: weights.distance } : {}),
-      ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {})
+      ...(selectedOptions.includes('NIRF') ? { nirf: weights.nirf } : {}),
+      ...(selectedOptions.includes('Highest_Package') ? { highest_package: weights.highest_package } : {}),
+      ...(selectedOptions.includes('Average_Package') ? { average_package: weights.average_package } : {}),
+      ...(selectedOptions.includes('Placement_Percentage') ? { placement_percentage: weights.placement_percentage } : {})
     }
 
     // Update the handleRankColleges data to include home_state
@@ -387,47 +396,34 @@ export default function FilterPage() {
             </select>
           </div>
           <div className="mb-4">
-            <label className="block mb-2 font-semibold text-gray-700">Options</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  value="Fees"
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSelectedOptions((prev) =>
-                      prev.includes(value) ? prev.filter((option) => option !== value) : [...prev, value],
-                    )
-                  }}
-                />
-                <span className="ml-2">Fees</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  value="Distance"
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSelectedOptions((prev) =>
-                      prev.includes(value) ? prev.filter((option) => option !== value) : [...prev, value],
-                    )
-                  }}
-                />
-                <span className="ml-2">Distance</span>
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  value="NIRF"
-                  onChange={(e) => {
-                    const value = e.target.value
-                    setSelectedOptions((prev) =>
-                      prev.includes(value) ? prev.filter((option) => option !== value) : [...prev, value],
-                    )
-                  }}
-                />
-                <span className="ml-2">NIRF Ranking</span>
-              </label>
+            <label className="block mb-2 font-semibold text-gray-700">Ranking Options</label>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { value: "Fees", label: "Fees" },
+                { value: "Distance", label: "Distance" },
+                { value: "NIRF", label: "NIRF Ranking" },
+                { value: "Highest_Package", label: "Highest Package" },
+                { value: "Average_Package", label: "Average Package" },
+                { value: "Placement_Percentage", label: "Placement Percentage" }
+              ].map(({ value, label }) => (
+                <label key={value} className="flex items-center p-2 rounded hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    value={value}
+                    checked={selectedOptions.includes(value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedOptions(prev =>
+                        prev.includes(value) 
+                          ? prev.filter(option => option !== value)
+                          : [...prev, value]
+                      );
+                    }}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-700">{label}</span>
+                </label>
+              ))}
             </div>
           </div>
           <div className="mb-4">
@@ -463,7 +459,10 @@ export default function FilterPage() {
             (weights.rank +
              (selectedOptions.includes('Fees') ? weights.fees : 0) +
              (selectedOptions.includes('Distance') ? weights.distance : 0) +
-             (selectedOptions.includes('NIRF') ? weights.nirf : 0)
+             (selectedOptions.includes('NIRF') ? weights.nirf : 0) +
+             (selectedOptions.includes('Highest_Package') ? weights.highest_package : 0) +
+             (selectedOptions.includes('Average_Package') ? weights.average_package : 0) +
+             (selectedOptions.includes('Placement_Percentage') ? weights.placement_percentage : 0)
             ).toFixed(2)
           }
         </p>
@@ -526,6 +525,51 @@ export default function FilterPage() {
             />
           </div>
         )}
+        {selectedOptions.includes('Highest_Package') && (
+          <div>
+            <label htmlFor="highestPackageWeight" className="block mb-1">Highest Package Weight</label>
+            <input
+              type="number"
+              id="highestPackageWeight"
+              value={weights.highest_package.toString()}
+              onChange={(e) => handleWeightChange('highest_package', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
+        {selectedOptions.includes('Average_Package') && (
+          <div>
+            <label htmlFor="averagePackageWeight" className="block mb-1">Average Package Weight</label>
+            <input
+              type="number"
+              id="averagePackageWeight"
+              value={weights.average_package.toString()}
+              onChange={(e) => handleWeightChange('average_package', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
+        {selectedOptions.includes('Placement_Percentage') && (
+          <div>
+            <label htmlFor="placementPercentageWeight" className="block mb-1">Placement Percentage Weight</label>
+            <input
+              type="number"
+              id="placementPercentageWeight"
+              value={weights.placement_percentage.toString()}
+              onChange={(e) => handleWeightChange('placement_percentage', e.target.value)}
+              className="w-full px-3 py-2 border rounded-md"
+              step="0.1"
+              min="0"
+              max="1"
+            />
+          </div>
+        )}
       </div>
     )}
   </div>
@@ -550,6 +594,9 @@ export default function FilterPage() {
                   {selectedOptions.includes("Distance") && <th className="border p-2">Distance (km)</th>}
                   {selectedOptions.includes("Fees") && <th className="border p-2">Fees</th>}
                   {selectedOptions.includes("NIRF") && <th className="border p-2">NIRF Ranking</th>}
+                  {selectedOptions.includes("Highest_Package") && <th className="border p-2">Highest Package</th>}
+                  {selectedOptions.includes("Average_Package") && <th className="border p-2">Average Package</th>}
+                  {selectedOptions.includes("Placement_Percentage") && <th className="border p-2">Placement Percentage</th>}
                   <th className="border p-2">Composite Score</th>
                 </tr>
               </thead>
@@ -562,6 +609,9 @@ export default function FilterPage() {
                     {selectedOptions.includes("Distance") && <td className="border p-2">{result.distance}</td>}
                     {selectedOptions.includes("Fees") && <td className="border p-2">{result.fees}</td>}
                     {selectedOptions.includes("NIRF") && <td className="border p-2">{result.nirf_ranking}</td>}
+                    {selectedOptions.includes("Highest_Package") && <td className="border p-2">{result.highest_package}</td>}
+                    {selectedOptions.includes("Average_Package") && <td className="border p-2">{result.average_package}</td>}
+                    {selectedOptions.includes("Placement_Percentage") && <td className="border p-2">{result.placement_percentage}</td>}
                     <td className="border p-2">{result.composite_score}</td>
                   </tr>
                 ))}
