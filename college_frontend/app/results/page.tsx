@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react"; // Add Suspense
+import { useEffect, useState, Suspense } from "react";
 import { rankColleges } from "../services/api.js";
 
 interface Result {
@@ -33,7 +33,6 @@ function ResultsContent() {
                 setDisplayOptions(filtersFromParams.displayOptions || []);
 
                 const resultsData = await rankColleges(filtersFromParams);
-                console.log("Results data:", resultsData); // Debug log
                 if (resultsData.error) {
                     console.error("Error from backend:", resultsData.error);
                     return;
@@ -49,17 +48,21 @@ function ResultsContent() {
     return (
         <div className="min-h-screen flex flex-col bg-gray-100">
             <main className="flex-grow container mx-auto px-4 py-8">
-                <h1 className="text-4xl font-bold mb-8 text-center text-blue-700">College Rankings</h1>
+                <h1 className="text-4xl font-bold mb-2 text-center text-blue-700">
+                    College Rankings
+                    <span className="block text-lg font-normal mt-2 text-gray-600">
+                        Results based on your selected preferences
+                    </span>
+                </h1>
                 {results.length > 0 ? (
-                    <div className="overflow-x-auto shadow-lg rounded-lg">
-                        <table className="w-full border-collapse bg-white rounded-lg shadow-md">
+                    <div className="overflow-x-auto rounded-xl shadow-lg">
+                        <table className="w-full border-collapse bg-white rounded-xl shadow-md">
                             <thead className="bg-blue-700 text-white text-lg font-bold">
                                 <tr>
-                                    <th className="border p-2">S.No.</th>
+                                    <th className="border p-4 rounded-tl-xl text-gray-200">S.No.</th>
                                     <th className="border p-4">Institute</th>
                                     <th className="border p-4">Branch</th>
                                     <th className="border p-4">Closing Rank</th>
-                                    {/* Show columns based on both selectedOptions and displayOptions */}
                                     {[...new Set([...selectedOptions, ...displayOptions])].map((option, index) => {
                                         switch(option) {
                                             case "Distance":
@@ -78,31 +81,33 @@ function ResultsContent() {
                                                 return null;
                                         }
                                     })}
-                                    <th className="border p-4">Composite Score</th>
+                                    <th className="border p-4 rounded-tr-xl">Composite Score</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {results.map((result: Result, index: number) => (
-                                    <tr key={`${result.institute}-${result.branch}`} 
-                                        className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
-                                        <td className="border p-4 text-center">{index + 1}</td>
+                                    <tr 
+                                        key={`${result.institute}-${result.branch}`} 
+                                        className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"} hover:bg-blue-50 transition-colors`}
+                                    >
+                                        <td className="border p-4 text-center text-gray-500">{index + 1}</td>
                                         <td className="border p-4">{result.institute}</td>
                                         <td className="border p-4">{result.branch}</td>
                                         <td className="border p-4">{result.closing_rank}</td>
                                         {[...new Set([...selectedOptions, ...displayOptions])].map((option, idx) => {
                                             switch(option) {
                                                 case "Distance":
-                                                    return <td key={idx} className="border p-4 text-gray-900">{result.distance} km</td>;
+                                                    return <td key={idx} className="border p-4">{result.distance} km</td>;
                                                 case "Fees":
-                                                    return <td key={idx} className="border p-4 text-gray-900">₹{result.fees?.toLocaleString()}</td>;
+                                                    return <td key={idx} className="border p-4">₹{result.fees?.toLocaleString()}</td>;
                                                 case "NIRF":
-                                                    return <td key={idx} className="border p-4 text-gray-900">{result.nirf_ranking}</td>;
+                                                    return <td key={idx} className="border p-4">{result.nirf_ranking}</td>;
                                                 case "Highest_Package":
-                                                    return <td key={idx} className="border p-4 text-gray-900">{result.highest_package?.toFixed(2)}</td>;
+                                                    return <td key={idx} className="border p-4">{result.highest_package?.toFixed(2)}</td>;
                                                 case "Average_Package":
-                                                    return <td key={idx} className="border p-4 text-gray-900">{result.average_package?.toFixed(2)}</td>;
+                                                    return <td key={idx} className="border p-4">{result.average_package?.toFixed(2)}</td>;
                                                 case "Placement_Percentage":
-                                                    return <td key={idx} className="border p-4 text-gray-900">{result.placement_percentage?.toFixed(1)}%</td>;
+                                                    return <td key={idx} className="border p-4">{result.placement_percentage?.toFixed(1)}%</td>;
                                                 default:
                                                     return null;
                                             }
@@ -114,21 +119,28 @@ function ResultsContent() {
                         </table>
                     </div>
                 ) : (
-                    <p className="text-center text-gray-700 text-lg font-semibold mt-8">
-                        Loading...
-                    </p>
+                    <div className="text-center py-12">
+                        <div className="inline-block animate-pulse">
+                            <div className="text-2xl text-gray-700 mb-2">⏳</div>
+                            <p className="text-gray-600 font-medium">
+                                Analyzing colleges based on your criteria...
+                            </p>
+                        </div>
+                    </div>
                 )}
             </main>
         </div>
     );
 }
 
-// Wrap the component that uses useSearchParams in Suspense
 export default function ResultsPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center">
-                <p className="text-center text-gray-700 text-lg font-semibold">Loading...</p>
+                <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                    <p className="text-gray-600 font-medium">Loading results...</p>
+                </div>
             </div>
         }>
             <ResultsContent />
