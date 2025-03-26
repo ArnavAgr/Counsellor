@@ -21,6 +21,7 @@ function ResultsContent() {
     const searchParams = useSearchParams();
     const [results, setResults] = useState<Result[]>([]);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+    const [displayOptions, setDisplayOptions] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -29,6 +30,7 @@ function ResultsContent() {
                     decodeURIComponent(searchParams.get("filters") || "{}")
                 );
                 setSelectedOptions(filtersFromParams.options || []);
+                setDisplayOptions(filtersFromParams.displayOptions || []);
 
                 const resultsData = await rankColleges(filtersFromParams);
                 console.log("Results data:", resultsData); // Debug log
@@ -57,44 +59,55 @@ function ResultsContent() {
                                     <th className="border p-4">Institute</th>
                                     <th className="border p-4">Branch</th>
                                     <th className="border p-4">Closing Rank</th>
-                                    {selectedOptions.includes("Distance") && <th className="border p-4">Distance (km)</th>}
-                                    {selectedOptions.includes("Fees") && <th className="border p-4">Fees</th>}
-                                    {selectedOptions.includes("NIRF") && <th className="border p-4">NIRF Ranking</th>}
-                                    {selectedOptions.includes("Highest_Package") && <th className="border p-4">Highest Package (LPA)</th>}
-                                    {selectedOptions.includes("Average_Package") && <th className="border p-4">Average Package (LPA)</th>}
-                                    {selectedOptions.includes("Placement_Percentage") && <th className="border p-4">Placement %</th>}
+                                    {/* Show columns based on both selectedOptions and displayOptions */}
+                                    {[...new Set([...selectedOptions, ...displayOptions])].map((option, index) => {
+                                        switch(option) {
+                                            case "Distance":
+                                                return <th key={index} className="border p-4">Distance (km)</th>;
+                                            case "Fees":
+                                                return <th key={index} className="border p-4">Fees</th>;
+                                            case "NIRF":
+                                                return <th key={index} className="border p-4">NIRF Ranking</th>;
+                                            case "Highest_Package":
+                                                return <th key={index} className="border p-4">Highest Package (LPA)</th>;
+                                            case "Average_Package":
+                                                return <th key={index} className="border p-4">Average Package (LPA)</th>;
+                                            case "Placement_Percentage":
+                                                return <th key={index} className="border p-4">Placement %</th>;
+                                            default:
+                                                return null;
+                                        }
+                                    })}
                                     <th className="border p-4">Composite Score</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {results.map((result: Result, index: number) => (
-                                    <tr
-                                        key={`${result.institute}-${result.branch}`}
-                                        className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
-                                    >
-                                        <td className="border p-4 text-center text-gray-900">{index + 1}</td>
-                                        <td className="border p-4 text-gray-900">{result.institute}</td>
-                                        <td className="border p-4 text-gray-900">{result.branch}</td>
-                                        <td className="border p-4 text-gray-900">{result.closing_rank}</td>
-                                        {selectedOptions.includes("Distance") && (
-                                            <td className="border p-4 text-gray-900">{result.distance} km</td>
-                                        )}
-                                        {selectedOptions.includes("Fees") && (
-                                            <td className="border p-4 text-gray-900">₹{result.fees?.toLocaleString()}</td>
-                                        )}
-                                        {selectedOptions.includes("NIRF") && (
-                                            <td className="border p-4 text-gray-900">{result.nirf_ranking}</td>
-                                        )}
-                                        {selectedOptions.includes("Highest_Package") && (
-                                            <td className="border p-4 text-gray-900">{result.highest_package?.toFixed(2)}</td>
-                                        )}
-                                        {selectedOptions.includes("Average_Package") && (
-                                            <td className="border p-4 text-gray-900">{result.average_package?.toFixed(2)}</td>
-                                        )}
-                                        {selectedOptions.includes("Placement_Percentage") && (
-                                            <td className="border p-4 text-gray-900">{result.placement_percentage?.toFixed(1)}%</td>
-                                        )}
-                                        <td className="border p-4 text-gray-900">{result.composite_score}</td>
+                                    <tr key={`${result.institute}-${result.branch}`} 
+                                        className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                        <td className="border p-4 text-center">{index + 1}</td>
+                                        <td className="border p-4">{result.institute}</td>
+                                        <td className="border p-4">{result.branch}</td>
+                                        <td className="border p-4">{result.closing_rank}</td>
+                                        {[...new Set([...selectedOptions, ...displayOptions])].map((option, idx) => {
+                                            switch(option) {
+                                                case "Distance":
+                                                    return <td key={idx} className="border p-4 text-gray-900">{result.distance} km</td>;
+                                                case "Fees":
+                                                    return <td key={idx} className="border p-4 text-gray-900">₹{result.fees?.toLocaleString()}</td>;
+                                                case "NIRF":
+                                                    return <td key={idx} className="border p-4 text-gray-900">{result.nirf_ranking}</td>;
+                                                case "Highest_Package":
+                                                    return <td key={idx} className="border p-4 text-gray-900">{result.highest_package?.toFixed(2)}</td>;
+                                                case "Average_Package":
+                                                    return <td key={idx} className="border p-4 text-gray-900">{result.average_package?.toFixed(2)}</td>;
+                                                case "Placement_Percentage":
+                                                    return <td key={idx} className="border p-4 text-gray-900">{result.placement_percentage?.toFixed(1)}%</td>;
+                                                default:
+                                                    return null;
+                                            }
+                                        })}
+                                        <td className="border p-4">{result.composite_score}</td>
                                     </tr>
                                 ))}
                             </tbody>

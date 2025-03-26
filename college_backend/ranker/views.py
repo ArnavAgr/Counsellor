@@ -253,6 +253,33 @@ def rank_colleges(request):
                         distance_scores = calculate_distance_scores(distances)
                         filtered_df['Distance_Score'] = distance_scores
 
+                # Calculate distances if needed for display or ranking
+                if ('Distance' in data.get('options', []) or 'Distance' in data.get('displayOptions', [])) and data.get('city'):
+                    selected_city_data = cities_df[cities_df['City'] == data['city']]
+                    if selected_city_data.empty:
+                        raise ValueError("Selected city not found in the dataset")
+                    selected_city_data = selected_city_data.iloc[0]
+                    
+                    # Calculate raw distances
+                    filtered_df['Distance'] = filtered_df.apply(
+                        lambda row: round(geodesic(
+                            (selected_city_data['Latitude'], selected_city_data['Longitude']),
+                            (row['Latitude'], row['Longitude'])
+                        ).km, 0),
+                        axis=1
+                    )
+                    
+                    # Calculate distance scores only if Distance is in ranking options
+                    if 'Distance' in data.get('options', []):
+                        distances = filtered_df['Distance'].tolist()
+                        distance_scores = calculate_distance_scores(distances)
+                        filtered_df['Distance_Score'] = distance_scores
+                        
+                        # Apply distance filter if max_distance is specified
+                        if 'max_distance' in data:
+                            max_distance = float(data['max_distance'])
+                            filtered_df = filtered_df[filtered_df['Distance'] <= max_distance]
+
                 # Process results
                 results = []
                 for _, row in filtered_df.iterrows():
@@ -264,25 +291,28 @@ def rank_colleges(request):
                             'composite_score': 0
                         }
                         
-                        if 'Fees' in data.get('options', []):
+                        # Add fields based on both ranking options and display options
+                        all_options = set(data.get('options', []) + data.get('displayOptions', []))
+                        
+                        if 'Fees' in all_options:
                             result['fees'] = int(row['Fees']) if pd.notna(row['Fees']) else 0
                         
-                        if 'Distance' in data.get('options', []):
-                            # Show actual distance in kilometers
+                        if 'Distance' in all_options:
                             result['distance'] = int(row['Distance']) if pd.notna(row['Distance']) else 0
                         
-                        if 'NIRF' in data.get('options', []):
+                        if 'NIRF' in all_options:
                             result['nirf_ranking'] = str(row['Nirf_Ranking']) if pd.notna(row['Nirf_Ranking']) else "Unranked"
                         
-                        # Add placement data if selected
-                        if 'Highest_Package' in data.get('options', []):
+                        if 'Highest_Package' in all_options:
                             result['highest_package'] = float(row['Highest_Package']) if pd.notna(row['Highest_Package']) else 0
-                        if 'Average_Package' in data.get('options', []):
+                        
+                        if 'Average_Package' in all_options:
                             result['average_package'] = float(row['Average_Package']) if pd.notna(row['Average_Package']) else 0
-                        if 'Placement_Percentage' in data.get('options', []):
+                        
+                        if 'Placement_Percentage' in all_options:
                             result['placement_percentage'] = float(row['Placement_Percentage']) if pd.notna(row['Placement_Percentage']) else 0
                         
-                        # Calculate raw composite score
+                        # Calculate composite score using only ranking options
                         result['composite_score'] = calculate_composite_score(
                             row, 
                             data.get('options', []),
@@ -290,6 +320,7 @@ def rank_colleges(request):
                             data.get('weights')
                         )
                         results.append(result)
+                        
                     except Exception as e:
                         logger.error(f"Error processing row: {e}")
                         logger.error(f"Row data: {row}")

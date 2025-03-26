@@ -57,6 +57,7 @@ export default function FilterPage() {
   const [states, setStates] = useState<string[]>([])
   const [selectedHomeState, setSelectedHomeState] = useState<string>("")
   const [results] = useState<Result[]>([]) // Remove setResults as it's not used
+  const [displayOptions, setDisplayOptions] = useState<string[]>([]);
   const router = useRouter()
 
   // Ensure this component runs only on the client
@@ -140,6 +141,12 @@ export default function FilterPage() {
   const handleRankColleges = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Add validation for Distance in both ranking and display options
+    if ((selectedOptions.includes("Distance") || displayOptions.includes("Distance")) && !selectedCityName) {
+      setError("Please select a city to view distance information")
+      return
+    }
+
     // Update validation for home state to include GFTI
     if (requiresHomeState && !selectedHomeState) {
       setError("Home state must be selected for NIT/GFTI/NIT+IIIT")
@@ -175,7 +182,8 @@ export default function FilterPage() {
       home_state: selectedHomeState || undefined,  // Include home state in request
       weights: useCustomWeights ? relevantWeights : undefined,
       ...(selectedOptions.includes('Fees') && { max_fees: maxFees }),
-      ...(selectedOptions.includes('Distance') && { max_distance: maxDistance })
+      ...(selectedOptions.includes('Distance') && { max_distance: maxDistance }),
+      displayOptions,  // Add displayOptions to the request data
     }
 
     try {
@@ -208,6 +216,16 @@ export default function FilterPage() {
       [field]: isNaN(numValue) ? 0 : numValue
     }))
   }
+
+  // Replace the old handleDisplayOptionChange with this simpler version
+  const handleDisplayOptionChange = (value: string) => {
+    setDisplayOptions(prev =>
+      prev.includes(value) 
+        ? prev.filter(option => option !== value)
+        : [...prev, value]
+    );
+    setError(null);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -397,6 +415,7 @@ export default function FilterPage() {
           </div>
           <div className="mb-4">
             <label className="block mb-2 font-semibold text-gray-700">Ranking Options</label>
+            <p className="text-sm text-gray-600 mb-2">These options will be used in calculating the composite score</p>
             <div className="flex flex-wrap gap-4">
               {[
                 { value: "Fees", label: "Fees" },
@@ -422,6 +441,39 @@ export default function FilterPage() {
                     className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                   <span className="ml-3 text-gray-700">{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {/* Add new Display Options section */}
+          <div className="mb-4">
+            <label className="block mb-2 font-semibold text-gray-700">Display Options</label>
+            <p className="text-sm text-gray-600 mb-2">
+              These options will only affect what columns are shown in results.
+              </p>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { value: "Fees", label: "Fees" },
+                { value: "Distance", label: "Distance", requiresCity: true },
+                { value: "NIRF", label: "NIRF Ranking" },
+                { value: "Highest_Package", label: "Highest Package" },
+                { value: "Average_Package", label: "Average Package" },
+                { value: "Placement_Percentage", label: "Placement Percentage" }
+              ].map(({ value, label, requiresCity }) => (
+                <label key={value} className="flex items-center p-2 rounded hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    value={value}
+                    checked={displayOptions.includes(value)}
+                    onChange={(e) => handleDisplayOptionChange(e.target.value)}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  />
+                  <span className="ml-3 text-gray-700">
+                    {label}
+                    {requiresCity && (
+                      <span className="text-xs text-gray-500 ml-2"></span>
+                    )}
+                  </span>
                 </label>
               ))}
             </div>
