@@ -34,8 +34,8 @@ export default function FilterPage() {
   const [branches, setBranches] = useState<Branch[]>([])
   const [selectedCityName, setSelectedCityName] = useState<string | null>(null)
   const [selectedOptions, setSelectedOptions] = useState<string[]>([])
-  const [maxFees, setMaxFees] = useState<number>(300000)
-  const [maxDistance, setMaxDistance] = useState<number>(5000)
+  const [maxFees] = useState<number>(300000) // Remove setter if not used
+  const [maxDistance] = useState<number>(5000) // Remove setter if not used
   const [selectedBranchName, setSelectedBranchName] = useState<string>("")
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedInstitutionTypes, setSelectedInstitutionTypes] = useState<string[]>(["NIT"]) // Change to array of strings

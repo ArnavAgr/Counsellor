@@ -37,3 +37,9 @@ In case you have made changes to the csv/excel files in the backend, follow the 
 
    Python manage.py migrate
 
+If you have to start a build first to run in product environment:
+
+  npm run build
+  
+  npm start
+

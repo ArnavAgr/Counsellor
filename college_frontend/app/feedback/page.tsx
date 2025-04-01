@@ -20,8 +20,9 @@ export default function FeedbackPage() {
       console.log("Feedback submitted:", formData);
       setSubmitted(true);
       setFormData({ name: "", email: "", feedback: "", rating: 0 });
-    } catch (err) {
+    } catch (error) {
       setError("Failed to submit feedback. Please try again later.");
+      console.error("Feedback submission error:", error);
     }
   };
 
