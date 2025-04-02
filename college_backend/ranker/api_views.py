@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import pandas as pd
-from .models import City, Branch
+from .models import City, Branch, State
 from .views import rank_colleges
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -59,16 +59,11 @@ def get_branches(request):
 @api_view(['GET'])
 def get_states(request):
     try:
-        # Read both NIT and GFTI files and combine states
-        nit_df = pd.read_excel('nit_combined.xlsx')
-        gfti_df = pd.read_excel('gfti_combined.xlsx')
-        
-        # Combine states from both files and remove duplicates
-        all_states = pd.concat([nit_df['State'], gfti_df['State']]).dropna().unique()
-        unique_states = sorted(all_states)
-        
-        return Response(unique_states)
+        # Get states from database
+        states = State.objects.values_list('name', flat=True).order_by('name')
+        return Response(list(states))
     except Exception as e:
+        print(f"Error fetching states: {str(e)}")
         return Response({'error': str(e)}, status=500)
 
 @api_view(['POST'])

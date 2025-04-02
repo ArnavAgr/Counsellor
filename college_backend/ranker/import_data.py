@@ -1,6 +1,6 @@
 import pandas as pd
 from django.db import transaction
-from .models import Institute, Branch, City
+from .models import Institute, Branch, City, State
 import os
 from geopy.distance import geodesic
 
@@ -40,6 +40,7 @@ def calculate_min_max_values():
                           iiit_data['Closing_Rank'].min(), gfti_data['Closing_Rank'].min())
     max_closing_rank = max(iit_data['Closing_Rank'].max(), nit_data['Closing_Rank'].max(), 
                           iiit_data['Closing_Rank'].max(), gfti_data['Closing_Rank'].max())
+    
     min_fee = min(iit_data['Fees'].min(), nit_data['Fees'].min(), 
                   iiit_data['Fees'].min(), gfti_data['Fees'].min())
     max_fee = max(iit_data['Fees'].max(), nit_data['Fees'].max(), 
@@ -73,6 +74,28 @@ def import_data():
 
         print(f"Combined data shape: {combined_df.shape}")
         print(f"Cities data shape: {cities_df.shape}")
+
+        # Update required columns to match actual Excel column names
+        required_columns = [
+            'Institute', 
+            'Branch', 
+            'Closing_Rank',
+            'Fees_2023_per_sem',
+            'Latitude',
+            'Longitude',
+            'Category',
+            'Gender',
+            'Nirf_Ranking',  # Changed from NIRF_Ranking
+            'Highest_Package',
+            'Average_Package',
+            'Placement_Percentage'
+        ]
+
+        missing_columns = [col for col in required_columns if col not in combined_df.columns]
+        if missing_columns:
+            print("Missing columns:", missing_columns)
+            print("Available columns:", combined_df.columns.tolist())
+            raise KeyError(f"Missing required columns: {missing_columns}")
     except Exception as e:
         print(f"Error reading Excel files: {str(e)}")
         return
@@ -81,8 +104,8 @@ def import_data():
     try:
         min_closing_rank = combined_df['Closing_Rank'].min()
         max_closing_rank = combined_df['Closing_Rank'].max()
-        min_fee = combined_df['Fees'].min()
-        max_fee = combined_df['Fees'].max()
+        min_fee = combined_df['Fees_2023_per_sem'].min()  
+        max_fee = combined_df['Fees_2023_per_sem'].max() 
 
         print(f"Min Closing Rank: {min_closing_rank}")
         print(f"Max Closing Rank: {max_closing_rank}")
@@ -118,10 +141,10 @@ def import_data():
         print(f"Error creating institutes: {str(e)}")
         return
 
-    # Creating a dictionary of fees
-    institute_fees = dict(zip(combined_df['Institute'], combined_df['Fees']))
+    # Creating a dictionary of fees with correct column name
+    institute_fees = dict(zip(combined_df['Institute'], combined_df['Fees_2023_per_sem']))
 
-    # Import Branch data
+    # Import Branch data with correct column names
     print("Importing Branch data...")
     try:
         branches = []
@@ -136,12 +159,11 @@ def import_data():
                     institute = institutes.first()  
 
                     # Use the institute to create the branch
-                    fee = institute_fees.get(row['Institute'], 0)  # Get fee or default to 0
                     branch = Branch(
                         institute=institute,
                         name=row['Branch'],
                         closing_rank=row['Closing_Rank'],
-                        fees=fee
+                        fees=row['Fees_2023_per_sem']  # Using correct column name
                     )
                     branch.full_clean()
                     branches.append(branch)
@@ -180,6 +202,28 @@ def import_data():
         print(f"Created {len(cities)} cities")
     except Exception as e:
         print(f"Error creating cities: {str(e)}")
+        return
+
+    # Import State data
+    print("Importing State data...")
+    try:
+        nit_df = pd.read_excel('nit_combined.xlsx')
+        gfti_df = pd.read_excel('gfti_combined.xlsx')
+        all_states = pd.concat([nit_df['State'], gfti_df['State']]).dropna().unique()
+        
+        states = []
+        for state_name in sorted(all_states):
+            try:
+                state = State(name=state_name)
+                state.full_clean()
+                states.append(state)
+            except Exception as e:
+                print(f"Error with state {state_name}: {str(e)}")
+        
+        State.objects.bulk_create(states)
+        print(f"Created {len(states)} states")
+    except Exception as e:
+        print(f"Error creating states: {str(e)}")
         return
 
     print("Data import completed successfully.")
