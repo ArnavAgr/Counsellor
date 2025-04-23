@@ -140,4 +140,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
      "https://collegechayan.com",  # Your production frontend URL
     "https://www.collegechayan.com",
-    "http://168.231.119.49/"]
+    "168.231.119.49"]
