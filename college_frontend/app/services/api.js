@@ -30,7 +30,7 @@ export const getBranches = async (institutionTypes) => {
 
     try {
         const queryParams = institutionTypes.map(type => `institution_types=${encodeURIComponent(type)}`).join('&');
-        const response = await fetch('https://collegechayan.com/branches/?${queryParams}', {
+        const response = await fetch(`https://collegechayan.com/branches/?${queryParams}`, {
             signal: controller.signal
         });
 
