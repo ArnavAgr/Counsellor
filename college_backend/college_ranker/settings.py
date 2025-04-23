@@ -127,6 +127,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+SECURE_SSL_REDIRECT = True  # Redirect HTTP to HTTPS
+CSRF_COOKIE_SECURE = True  # Use secure cookies
+SESSION_COOKIE_SECURE = True  # Use secure cookies
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
