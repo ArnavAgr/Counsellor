@@ -3,7 +3,7 @@ export const getCities = async () => {
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
     try {
-        const response = await fetch('http://localhost:8000/api/cities/', {
+        const response = await fetch('https://collegechayan.com/cities/', {
             signal: controller.signal
         });
 
@@ -30,7 +30,7 @@ export const getBranches = async (institutionTypes) => {
 
     try {
         const queryParams = institutionTypes.map(type => `institution_types=${encodeURIComponent(type)}`).join('&');
-        const response = await fetch(`http://localhost:8000/api/branches/?${queryParams}`, {
+        const response = await fetch('https://collegechayan.com/branches/?${queryParams}', {
             signal: controller.signal
         });
 
@@ -56,7 +56,7 @@ export const rankColleges = async (data) => {
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for ranking
 
     try {
-        const response = await fetch('http://localhost:8000/api/rank_colleges/', {
+        const response = await fetch('https://collegechayan.com/rank_colleges/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export const getStates = async () => {
     const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
     try {
-        const response = await fetch('http://localhost:8000/api/states/', {
+        const response = await fetch('https://collegechayan.com/states/', {
             signal: controller.signal
         });
 
