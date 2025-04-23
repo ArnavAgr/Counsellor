@@ -134,5 +134,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your Next.js frontend URL here
-]
+     "https://collegechayan.com",  # Your production frontend URL
+    "https://www.collegechayan.com",]
