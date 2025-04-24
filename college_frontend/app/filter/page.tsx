@@ -230,20 +230,20 @@ export default function FilterPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-7xl">
-        <h1 className="text-3xl font-bold mb-8 text-center">Find Your Ideal College</h1>
+      <main className="flex-grow container mx-auto px-4 py-6 max-w-5xl">
+        <h1 className="text-2xl font-bold mb-8 text-center">Find Your Ideal College</h1>
         
         <form
           onSubmit={handleRankColleges}
           className="w-full bg-white p-8 rounded-lg shadow-md"
         >
           {/* Main form container with improved layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Left Column - Basic Information */}
             <div className="lg:col-span-4 space-y-6">
               <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4 pb-2 border-b border-gray-200">Institution & Location</h2>
+                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Institution & Location</h2>
                 
                 {/* Institution Type Section */}
                 <div className="mb-6">
@@ -271,7 +271,7 @@ export default function FilterPage() {
                 {/* Home State Section - Conditionally rendered */}
                 {requiresHomeState && (
                   <div className="mb-6">
-                    <label htmlFor="homeState" className="block mb-2 font-semibold text-gray-700">
+                    <label htmlFor="homeState" className="text-sm block mb-2 font-semibold text-gray-700">
                       Select Home State<span className="text-red-500">*</span>
                     </label>
                     <select
@@ -293,7 +293,7 @@ export default function FilterPage() {
 
                 {/* City Selection */}
                 <div className="mb-6">
-                  <label htmlFor="city" className="block mb-2 font-semibold text-gray-700">
+                  <label htmlFor="city" className="text-sm block mb-2 font-semibold text-gray-700">
                     Select City
                   </label>
                   <div className="relative">
@@ -330,11 +330,11 @@ export default function FilterPage() {
 
               {/* Personal Criteria Section */}
               <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4 pb-2 border-b border-gray-200">Personal Criteria</h2>
+                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Personal Criteria</h2>
                 
                 {/* Category Selection */}
                 <div className="mb-6">
-                  <label htmlFor="category" className="block mb-2 font-semibold text-gray-700">
+                  <label htmlFor="category" className="block mb-2 font-semibold text-gray-700 text-sm">
                     Select Category<span className="text-red-500">*</span>
                   </label>
                   <select
@@ -359,7 +359,7 @@ export default function FilterPage() {
 
                 {/* Gender Selection */}
                 <div className="mb-6">
-                  <label htmlFor="gender" className="block mb-2 font-semibold text-gray-700">
+                  <label htmlFor="gender" className="block mb-2 font-semibold text-gray-700 text-sm">
                     Select Gender<span className="text-red-500">*</span>
                   </label>
                   <select
@@ -376,7 +376,7 @@ export default function FilterPage() {
 
                 {/* Branch Selection */}
                 <div className="mb-6">
-                  <label htmlFor="branch" className="block mb-2 font-semibold text-gray-700">
+                  <label htmlFor="branch" className="text-sm block mb-2 font-semibold text-gray-700">
                     Select Branch
                   </label>
                   <select
@@ -406,12 +406,12 @@ export default function FilterPage() {
             {/* Middle Column - Options */}
             <div className="lg:col-span-4 space-y-6">
               <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4 pb-2 border-b border-gray-200">Ranking & Display Options</h2>
+                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Ranking & Display Options</h2>
                 
                 {/* Ranking Options */}
                 <div className="mb-6">
-                  <label className="block mb-2 font-semibold text-gray-700">Ranking Options</label>
-                  <p className="text-sm text-gray-600 mb-3">These options will be used in calculating the composite score</p>
+                  <label className="block mb-2 font-semibold text-gray-700 text-sm">Ranking Options</label>
+                  <p className="text-xs text-gray-600 mb-3">These options will be used in calculating the composite score</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
                       { value: "Fees", label: "Fees" },
@@ -444,8 +444,8 @@ export default function FilterPage() {
                 
                 {/* Display Options */}
                 <div className="mb-6">
-                  <label className="block mb-2 font-semibold text-gray-700">Display Options</label>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <label className="text-sm block mb-2 font-semibold text-gray-700">Display Options</label>
+                  <p className="text-xs text-gray-600 mb-3">
                     These options will only affect what columns are shown in results.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -481,9 +481,9 @@ export default function FilterPage() {
             {/* Right Column - Weightage */}
             <div className="lg:col-span-4 space-y-6">
               <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4 pb-2 border-b border-gray-200">Weightage Options</h2>
+                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Weightage Options</h2>
                 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center">
                     <input
                       type="radio"
@@ -493,7 +493,7 @@ export default function FilterPage() {
                       onChange={() => setUseCustomWeights(false)}
                       className="mr-2"
                     />
-                    <label htmlFor="predefinedWeights">Use Predefined Weights</label>
+                    <label htmlFor="predefinedWeights" className="text-sm">Use Predefined Weights</label>
                   </div>
                   <div className="flex items-center">
                     <input
@@ -504,7 +504,7 @@ export default function FilterPage() {
                       onChange={() => setUseCustomWeights(true)}
                       className="mr-2"
                     />
-                    <label htmlFor="customWeights">Use Custom Weights</label>
+                    <label htmlFor="customWeights" className="text-sm">Use Custom Weights</label>
                   </div>
                   
                   {useCustomWeights && (
@@ -663,12 +663,12 @@ export default function FilterPage() {
                   <th className="border p-2">Institute</th>
                   <th className="border p-2">Branch</th>
                   <th className="border p-2">Closing Rank</th>
-                  {selectedOptions.includes("Distance") && <th className="border p-2">Distance (km)</th>}
-                  {selectedOptions.includes("Fees") && <th className="border p-2">Fees</th>}
-                  {selectedOptions.includes("NIRF") && <th className="border p-2">NIRF Ranking</th>}
-                  {selectedOptions.includes("Highest_Package") && <th className="border p-2">Highest Package</th>}
-                  {selectedOptions.includes("Average_Package") && <th className="border p-2">Average Package</th>}
-                  {selectedOptions.includes("Placement_Percentage") && <th className="border p-2">Placement Percentage</th>}
+                  {selectedOptions.includes("Distance") && <th className="border p-0 text-xs">Distance (km)</th>}
+                  {selectedOptions.includes("Fees") && <th className="border p-0 text-xs">Fees</th>}
+                  {selectedOptions.includes("NIRF") && <th className="border p-0 text-xs">NIRF Ranking</th>}
+                  {selectedOptions.includes("Highest_Package") && <th className="border p-0 text-xs">Highest Package</th>}
+                  {selectedOptions.includes("Average_Package") && <th className="border p-0 text-xs">Average Package</th>}
+                  {selectedOptions.includes("Placement_Percentage") && <th className="border p-0 text-xs">Placement Percentage</th>}
                   <th className="border p-2">Composite Score</th>
                 </tr>
               </thead>
