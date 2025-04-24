@@ -53,27 +53,27 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <Header/>
       <main className="flex-grow">
-        <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-8">
+        <section className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-0">
           <div className="container mx-auto px-4 flex flex-col md:flex-row items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="md:w-1/2 mb-8 md:mb-0"
+              className="md:w-1/2 mb-8 md:mb-0 pl-10"
             >
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <h1 className="text-4xl md:text-3xl font-bold mb-6">
                 Find Your Perfect College: JoSAA Counselling Simplified for JEE Aspirants
               </h1>
-              <p className="text-xl mb-8">
+              <p className="text-xl mb-8 pl-0">  
                 {typedText}
               </p>
               <a href="filter" className="inline-block bg-white text-blue-600 py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300">
                 Find Colleges NOW
               </a>
             </motion.div>
-            <div className="md:w-1/2 flex justify-center items-center">
+            <div className="md:w-1/2 flex justify-center items-center pr-10">
               {typeof window !== 'undefined' && (  // Add this check
                 <Lottie
                   animationData={teachingAnimation}
@@ -98,7 +98,7 @@ export default function Home() {
                 hidden: { opacity: 0, y: 50 },
               }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 pl-10"
             >
               {[
                 {
@@ -132,7 +132,7 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="bg-gray-800 text-white py-8">
+      <footer className="bg-gray-800 text-white py-4">
         <div className="container mx-auto px-4 text-center">
           <p>&copy; 2025 CollegeChayan. All rights reserved.</p>
         </div>

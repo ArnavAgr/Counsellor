@@ -8,17 +8,17 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-md">
-      <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center pl-12">
         <Link href="/" className="text-2xl font-bold text-blue-800">
           CollegeChayan
         </Link>
         {/* Desktop Navigation */}
         <nav className="hidden md:block">
-          <ul className="flex space-x-6">
+          <ul className="flex space-x-6 items-center"> {/* Added items-center */}
             <li>
               <Link
                 href="/"
-                className="text-gray-600 hover:text-blue-600 transition duration-300"
+                className="text-sm text-gray-600 hover:text-blue-600 transition duration-300"
               >
                 Home
               </Link>
@@ -26,7 +26,7 @@ export default function Header() {
             <li>
               <Link
                 href="/filter"
-                className="text-gray-600 hover:text-blue-600 transition duration-300"
+                className="text-sm text-gray-600 hover:text-blue-600 transition duration-300"
               >
                 Find Colleges
               </Link>
@@ -34,7 +34,7 @@ export default function Header() {
             <li>
               <Link
                 href="/disclaimer"
-                className="text-gray-600 hover:text-blue-600 transition duration-300"
+                className="text-sm text-gray-600 hover:text-blue-600 transition duration-300"
               >
                 Disclaimer
               </Link>
@@ -42,7 +42,7 @@ export default function Header() {
             <li>
               <Link
                 href="/feedback"
-                className="text-gray-600 hover:text-blue-600 transition duration-300"
+                className="text-sm text-gray-600 hover:text-blue-600 transition duration-300 mr-8"
               >
                 Feedback
               </Link>
