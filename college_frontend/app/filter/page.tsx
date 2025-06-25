@@ -231,32 +231,31 @@ export default function FilterPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-6 max-w-5xl">
-        <h1 className="text-2xl font-bold mb-8 text-center">Find Your Ideal College</h1>
-        
+        <h1 className="text-2xl font-bold mb-4 text-center">Find Your Ideal College</h1>
         <form
           onSubmit={handleRankColleges}
-          className="w-full bg-white p-8 rounded-lg shadow-md"
+          className="w-full relative"
         >
-          {/* Main form container with improved layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Left Column - Basic Information */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Institution & Location</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Institution & Location, Personal Criteria */}
+            <div className="space-y-6">
+              <div className="p-5 bg-white rounded-xl shadow-lg">
+                <h2 className="text-lg font-semibold mb-3 pb-2 border-b border-gray-100">Institution & Location</h2>
                 
                 {/* Institution Type Section */}
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <div className="mb-4">
+                  <label className="block text-xs font-semibold text-gray-700 mb-2">
                     Select Institution Type<span className="text-red-500">*</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {["IIT", "NIT", "IIIT", "GFTI", "NIT+IIIT"].map(type => (
+                    {[
+                      "IIT", "NIT", "IIIT", "GFTI", "NIT+IIIT"
+                    ].map(type => (
                       <button
                         key={type}
                         type="button"
                         onClick={() => handleInstitutionTypeChange(type)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        className={`px-3 py-1 rounded-lg font-medium text-sm transition-all duration-200 ${
                           selectedInstitutionTypes.includes(type)
                             ? "bg-blue-600 text-white shadow-md transform scale-105"
                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -270,15 +269,15 @@ export default function FilterPage() {
 
                 {/* Home State Section - Conditionally rendered */}
                 {requiresHomeState && (
-                  <div className="mb-6">
-                    <label htmlFor="homeState" className="text-sm block mb-2 font-semibold text-gray-700">
+                  <div className="mb-4">
+                    <label htmlFor="homeState" className="text-xs block mb-1 font-semibold text-gray-700">
                       Select Home State<span className="text-red-500">*</span>
                     </label>
                     <select
                       id="homeState"
                       value={selectedHomeState}
                       onChange={(e) => setSelectedHomeState(e.target.value)}
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       required={requiresHomeState}
                     >
                       <option value="">Select State</option>
@@ -292,8 +291,8 @@ export default function FilterPage() {
                 )}
 
                 {/* City Selection */}
-                <div className="mb-6">
-                  <label htmlFor="city" className="text-sm block mb-2 font-semibold text-gray-700">
+                <div className="mb-4">
+                  <label htmlFor="city" className="text-xs block mb-1 font-semibold text-gray-700">
                     Select City
                   </label>
                   <div className="relative">
@@ -307,17 +306,17 @@ export default function FilterPage() {
                       onFocus={() => setShowDropdown(true)}
                       onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
                       placeholder="Search city..."
-                      className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                     {showDropdown && (
-                      <ul className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-40 overflow-y-auto mt-1">
+                      <ul className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-32 overflow-y-auto mt-1 text-sm">
                         {cities
                           .filter((city) => city.name.toLowerCase().includes(selectedCityName?.toLowerCase() || ""))
                           .map((city) => (
                             <li
                               key={city.id}
                               onMouseDown={() => handleCitySelect(city.name)}
-                              className="px-4 py-2 cursor-pointer hover:bg-blue-100"
+                              className="px-3 py-1 cursor-pointer hover:bg-blue-100"
                             >
                               {city.name}
                             </li>
@@ -328,20 +327,19 @@ export default function FilterPage() {
                 </div>
               </div>
 
-              {/* Personal Criteria Section */}
-              <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Personal Criteria</h2>
+              <div className="p-5 bg-white rounded-xl shadow-lg">
+                <h2 className="text-lg font-semibold mb-3 pb-2 border-b border-gray-100">Personal Criteria</h2>
                 
                 {/* Category Selection */}
-                <div className="mb-6">
-                  <label htmlFor="category" className="block mb-2 font-semibold text-gray-700 text-sm">
+                <div className="mb-4">
+                  <label htmlFor="category" className="block mb-1 font-semibold text-gray-700 text-xs">
                     Select Category<span className="text-red-500">*</span>
                   </label>
                   <select
                     id="category"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     required
                   >
                     <option value="OPEN">OPEN</option>
@@ -358,15 +356,15 @@ export default function FilterPage() {
                 </div>
 
                 {/* Gender Selection */}
-                <div className="mb-6">
-                  <label htmlFor="gender" className="block mb-2 font-semibold text-gray-700 text-sm">
+                <div className="mb-4">
+                  <label htmlFor="gender" className="block mb-1 font-semibold text-gray-700 text-xs">
                     Select Gender<span className="text-red-500">*</span>
                   </label>
                   <select
                     id="gender"
                     value={selectedGender}
                     onChange={(e) => setSelectedGender(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     required
                   >
                     <option value="Gender-Neutral">Gender-Neutral</option>
@@ -375,14 +373,14 @@ export default function FilterPage() {
                 </div>
 
                 {/* Branch Selection */}
-                <div className="mb-6">
-                  <label htmlFor="branch" className="text-sm block mb-2 font-semibold text-gray-700">
+                <div className="mb-4">
+                  <label htmlFor="branch" className="text-xs block mb-1 font-semibold text-gray-700">
                     Select Branch
                   </label>
                   <select
                     id="branch"
                     onChange={(e) => setSelectedBranchName(e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   >
                     <option value="" key="default-branch">
                       Select Branch
@@ -403,16 +401,16 @@ export default function FilterPage() {
               </div>
             </div>
             
-            {/* Middle Column - Options */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Ranking & Display Options</h2>
+            {/* Right Column: Ranking & Display Options, Weightage Options */}
+            <div className="space-y-6">
+              <div className="p-5 bg-white rounded-xl shadow-lg">
+                <h2 className="text-lg font-semibold mb-3 pb-2 border-b border-gray-100">Ranking & Display Options</h2>
                 
                 {/* Ranking Options */}
-                <div className="mb-6">
-                  <label className="block mb-2 font-semibold text-gray-700 text-sm">Ranking Options</label>
-                  <p className="text-xs text-gray-600 mb-3">These options will be used in calculating the composite score</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="mb-4">
+                  <label className="block mb-1 font-semibold text-gray-700 text-xs">Ranking Options</label>
+                  <p className="text-xs text-gray-600 mb-2">These options will be used in calculating the composite score</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     {[
                       { value: "Fees", label: "Fees" },
                       { value: "Distance", label: "Distance" },
@@ -421,7 +419,7 @@ export default function FilterPage() {
                       { value: "Average_Package", label: "Average Package" },
                       { value: "Placement_Percentage", label: "Placement Percentage" }
                     ].map(({ value, label }) => (
-                      <label key={value} className="flex items-center p-2 rounded hover:bg-gray-100 border border-gray-100">
+                      <label key={value} className="flex items-center p-1 rounded hover:bg-gray-100 border border-gray-100">
                         <input
                           type="checkbox"
                           value={value}
@@ -434,21 +432,21 @@ export default function FilterPage() {
                                 : [...prev, value]
                             );
                           }}
-                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                         />
-                        <span className="ml-3 text-gray-700">{label}</span>
+                        <span className="ml-2 text-gray-700 text-xs">{label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 
                 {/* Display Options */}
-                <div className="mb-6">
-                  <label className="text-sm block mb-2 font-semibold text-gray-700">Display Options</label>
-                  <p className="text-xs text-gray-600 mb-3">
+                <div className="mb-4">
+                  <label className="text-xs block mb-1 font-semibold text-gray-700">Display Options</label>
+                  <p className="text-xs text-gray-600 mb-2">
                     These options will only affect what columns are shown in results.
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                     {[
                       { value: "Fees", label: "Fees" },
                       { value: "Distance", label: "Distance", requiresCity: true },
@@ -457,18 +455,18 @@ export default function FilterPage() {
                       { value: "Average_Package", label: "Average Package" },
                       { value: "Placement_Percentage", label: "Placement Percentage" }
                     ].map(({ value, label, requiresCity }) => (
-                      <label key={value} className="flex items-center p-2 rounded hover:bg-gray-100 border border-gray-100">
+                      <label key={value} className="flex items-center p-1 rounded hover:bg-gray-100 border border-gray-100">
                         <input
                           type="checkbox"
                           value={value}
                           checked={displayOptions.includes(value)}
                           onChange={(e) => handleDisplayOptionChange(e.target.value)}
-                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                         />
-                        <span className="ml-3 text-gray-700">
+                        <span className="ml-2 text-gray-700 text-xs">
                           {label}
                           {requiresCity && (
-                            <span className="text-xs text-gray-500 ml-2"></span>
+                            <span className="text-xs text-gray-500 ml-1"></span>
                           )}
                         </span>
                       </label>
@@ -476,14 +474,10 @@ export default function FilterPage() {
                   </div>
                 </div>
               </div>
-            </div>
-            
-            {/* Right Column - Weightage */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="p-6 bg-gray-50 rounded-lg shadow-sm">
-                <h2 className="text-l font-semibold mb-4 pb-2 border-b border-gray-200">Weightage Options</h2>
+              <div className="p-5 bg-white rounded-xl shadow-lg">
+                <h2 className="text-lg font-semibold mb-3 pb-2 border-b border-gray-100">Weightage Options</h2>
                 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <div className="flex items-center">
                     <input
                       type="radio"
@@ -491,9 +485,9 @@ export default function FilterPage() {
                       name="weightOption"
                       checked={!useCustomWeights}
                       onChange={() => setUseCustomWeights(false)}
-                      className="mr-2"
+                      className="mr-1"
                     />
-                    <label htmlFor="predefinedWeights" className="text-sm">Use Predefined Weights</label>
+                    <label htmlFor="predefinedWeights" className="text-xs">Use Predefined Weights</label>
                   </div>
                   <div className="flex items-center">
                     <input
@@ -502,14 +496,14 @@ export default function FilterPage() {
                       name="weightOption"
                       checked={useCustomWeights}
                       onChange={() => setUseCustomWeights(true)}
-                      className="mr-2"
+                      className="mr-1"
                     />
-                    <label htmlFor="customWeights" className="text-sm">Use Custom Weights</label>
+                    <label htmlFor="customWeights" className="text-xs">Use Custom Weights</label>
                   </div>
                   
                   {useCustomWeights && (
-                    <div className="space-y-4 pt-3 border-t border-gray-200">
-                      <p className="text-sm text-gray-600 mb-4">
+                    <div className="space-y-2 pt-2 border-t border-gray-200">
+                      <p className="text-xs text-gray-600 mb-2">
                         Note: The sum of all weights must equal 1.<br></br>
                         Current sum: {
                           (weights.rank +
@@ -522,112 +516,105 @@ export default function FilterPage() {
                           ).toFixed(2)
                         }
                       </p>
-                      
                       <div>
-                        <label htmlFor="rankWeight" className="block mb-1">Rank Weight (Required)</label>
+                        <label htmlFor="rankWeight" className="block mb-1 text-xs">Rank Weight (Required)</label>
                         <input
                           type="number"
                           id="rankWeight"
                           value={weights.rank.toString()}
                           onChange={(e) => handleWeightChange('rank', e.target.value)}
-                          className="w-full px-3 py-2 border rounded-md"
+                          className="w-full px-2 py-1 border rounded-md text-xs"
                           step="0.1"
                           min="0"
                           max="1"
                           required
                         />
                       </div>
-                      
                       {/* Dynamically show weight inputs based on selected options */}
                       {selectedOptions.includes('Fees') && (
                         <div>
-                          <label htmlFor="feesWeight" className="block mb-1">Fees Weight</label>
+                          <label htmlFor="feesWeight" className="block mb-1 text-xs">Fees Weight</label>
                           <input
                             type="number"
                             id="feesWeight"
                             value={weights.fees.toString()}
                             onChange={(e) => handleWeightChange('fees', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
                           />
                         </div>
                       )}
-                      
                       {selectedOptions.includes('Distance') && (
                         <div>
-                          <label htmlFor="distanceWeight" className="block mb-1">Distance Weight</label>
+                          <label htmlFor="distanceWeight" className="block mb-1 text-xs">Distance Weight</label>
                           <input
                             type="number"
                             id="distanceWeight"
                             value={weights.distance.toString()}
                             onChange={(e) => handleWeightChange('distance', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
                           />
                         </div>
                       )}
-                      
                       {selectedOptions.includes('NIRF') && (
                         <div>
-                          <label htmlFor="nirfWeight" className="block mb-1">NIRF Weight</label>
+                          <label htmlFor="nirfWeight" className="block mb-1 text-xs">NIRF Weight</label>
                           <input
                             type="number"
                             id="nirfWeight"
                             value={weights.nirf.toString()}
                             onChange={(e) => handleWeightChange('nirf', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
                           />
                         </div>
                       )}
-                      
                       {selectedOptions.includes('Highest_Package') && (
                         <div>
-                          <label htmlFor="highestPackageWeight" className="block mb-1">Highest Package Weight</label>
+                          <label htmlFor="highestPackageWeight" className="block mb-1 text-xs">Highest Package Weight</label>
                           <input
                             type="number"
                             id="highestPackageWeight"
                             value={weights.highest_package.toString()}
                             onChange={(e) => handleWeightChange('highest_package', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
                           />
                         </div>
                       )}
-                      
                       {selectedOptions.includes('Average_Package') && (
                         <div>
-                          <label htmlFor="averagePackageWeight" className="block mb-1">Average Package Weight</label>
+                          <label htmlFor="averagePackageWeight" className="block mb-1 text-xs">Average Package Weight</label>
                           <input
                             type="number"
                             id="averagePackageWeight"
                             value={weights.average_package.toString()}
                             onChange={(e) => handleWeightChange('average_package', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
                           />
                         </div>
                       )}
-                      
                       {selectedOptions.includes('Placement_Percentage') && (
                         <div>
-                          <label htmlFor="placementPercentageWeight" className="block mb-1">Placement Percentage Weight</label>
+                          <label htmlFor="placementPercentageWeight" className="block mb-1 text-xs">Placement Percentage Weight</label>
                           <input
                             type="number"
                             id="placementPercentageWeight"
                             value={weights.placement_percentage.toString()}
                             onChange={(e) => handleWeightChange('placement_percentage', e.target.value)}
-                            className="w-full px-3 py-2 border rounded-md"
+                            className="w-full px-2 py-1 border rounded-md text-xs"
                             step="0.1"
                             min="0"
                             max="1"
@@ -639,61 +626,61 @@ export default function FilterPage() {
                 </div>
               </div>
             </div>
-            
-            {/* Submit Button - Full Width */}
-            <div className="lg:col-span-12">
-              {error && <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-md">{error}</div>}
-              
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-gray-400 text-lg font-medium"
-                disabled={isLoading}
-              >
-                {isLoading ? "Processing..." : "Rank Colleges"}
-              </button>
-            </div>
+          </div>
+          {/* Sticky Submit Button */}
+          <div className="sticky bottom-0 left-0 w-full bg-white shadow-lg py-4 px-4 z-20 mt-8">
+            {error && <div className="mb-2 p-2 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>}
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition duration-300 disabled:bg-gray-400 text-lg font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Rank Colleges"}
+            </button>
           </div>
         </form>
-        
-        <div className="mt-8 overflow-x-auto">
+        {/* Results Table */}
+        <div className="mt-8">
           {results.length > 0 && (
-            <table className="w-full border-collapse table-auto">
-              <thead>
-                <tr>
-                  <th className="border p-2">Institute</th>
-                  <th className="border p-2">Branch</th>
-                  <th className="border p-2">Closing Rank</th>
-                  {selectedOptions.includes("Distance") && <th className="border p-0 text-xs">Distance (km)</th>}
-                  {selectedOptions.includes("Fees") && <th className="border p-0 text-xs">Fees</th>}
-                  {selectedOptions.includes("NIRF") && <th className="border p-0 text-xs">NIRF Ranking</th>}
-                  {selectedOptions.includes("Highest_Package") && <th className="border p-0 text-xs">Highest Package</th>}
-                  {selectedOptions.includes("Average_Package") && <th className="border p-0 text-xs">Average Package</th>}
-                  {selectedOptions.includes("Placement_Percentage") && <th className="border p-0 text-xs">Placement Percentage</th>}
-                  <th className="border p-2">Composite Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((result: Result) => (
-                  <tr key={`${result.institute}-${result.branch}`}>
-                    <td className="border p-2">{result.institute}</td>
-                    <td className="border p-2">{result.branch}</td>
-                    <td className="border p-2">{result.closing_rank}</td>
-                    {selectedOptions.includes("Distance") && <td className="border p-2">{result.distance}</td>}
-                    {selectedOptions.includes("Fees") && <td className="border p-2">{result.fees}</td>}
-                    {selectedOptions.includes("NIRF") && <td className="border p-2">{result.nirf_ranking}</td>}
-                    {selectedOptions.includes("Highest_Package") && <td className="border p-2">{result.highest_package}</td>}
-                    {selectedOptions.includes("Average_Package") && <td className="border p-2">{result.average_package}</td>}
-                    {selectedOptions.includes("Placement_Percentage") && <td className="border p-2">{result.placement_percentage}</td>}
-                    <td className="border p-2">{result.composite_score}</td>
+            <div className="max-h-80 overflow-y-auto rounded-xl shadow-lg bg-white">
+              <table className="w-full border-collapse table-auto text-sm">
+                <thead>
+                  <tr>
+                    <th className="border p-1">Institute</th>
+                    <th className="border p-1">Branch</th>
+                    <th className="border p-1">Closing Rank</th>
+                    {selectedOptions.includes("Distance") && <th className="border p-0 text-xs">Distance (km)</th>}
+                    {selectedOptions.includes("Fees") && <th className="border p-0 text-xs">Fees</th>}
+                    {selectedOptions.includes("NIRF") && <th className="border p-0 text-xs">NIRF Ranking</th>}
+                    {selectedOptions.includes("Highest_Package") && <th className="border p-0 text-xs">Highest Package</th>}
+                    {selectedOptions.includes("Average_Package") && <th className="border p-0 text-xs">Average Package</th>}
+                    {selectedOptions.includes("Placement_Percentage") && <th className="border p-0 text-xs">Placement Percentage</th>}
+                    <th className="border p-1">Composite Score</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {results.map((result: Result) => (
+                    <tr key={`${result.institute}-${result.branch}`}>
+                      <td className="border p-1">{result.institute}</td>
+                      <td className="border p-1">{result.branch}</td>
+                      <td className="border p-1">{result.closing_rank}</td>
+                      {selectedOptions.includes("Distance") && <td className="border p-1">{result.distance}</td>}
+                      {selectedOptions.includes("Fees") && <td className="border p-1">{result.fees}</td>}
+                      {selectedOptions.includes("NIRF") && <td className="border p-1">{result.nirf_ranking}</td>}
+                      {selectedOptions.includes("Highest_Package") && <td className="border p-1">{result.highest_package}</td>}
+                      {selectedOptions.includes("Average_Package") && <td className="border p-1">{result.average_package}</td>}
+                      {selectedOptions.includes("Placement_Percentage") && <td className="border p-1">{result.placement_percentage}</td>}
+                      <td className="border p-1">{result.composite_score}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </main>
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
+      <footer className="bg-gray-800 text-white py-4">
+        <div className="container mx-auto px-2 text-center text-xs">
           <p>&copy; 2025 JEE College Finder. All rights reserved.</p>
         </div>
       </footer>
